@@ -10,6 +10,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "25mb",
     },
+    allowedDevOrigins: ["172.19.208.1", "172.19.208.1:3000", "localhost", "127.0.0.1"],
   },
   outputFileTracingRoot: __dirname,
   serverExternalPackages: ["puppeteer", "docx", "image-size"],
