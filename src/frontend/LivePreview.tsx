@@ -6,8 +6,16 @@ import type { ReportPayload } from "@/types/report";
 type Props = { payload: ReportPayload };
 
 export function LivePreview({ payload }: Props) {
-  const html = useMemo(() => renderReportHtml(payload), [payload]);
+  const [assetBaseUrl, setAssetBaseUrl] = useState("http://localhost:3000/");
+  const html = useMemo(
+    () => renderReportHtml(payload, { assetBaseUrl }),
+    [payload, assetBaseUrl]
+  );
   const [debounced, setDebounced] = useState(html);
+
+  useEffect(() => {
+    setAssetBaseUrl(`${window.location.origin}/`);
+  }, []);
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(html), 150);

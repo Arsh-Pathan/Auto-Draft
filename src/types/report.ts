@@ -17,6 +17,8 @@ export type ReportMeta = {
   semester: string;
   title: string;
   date: string;
+  venue: string;
+  participants: string;
   acaRNo: string;
   revNo: string;
 };

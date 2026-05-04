@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { ReportForm } from "@/frontend/ReportForm";
 import { LivePreview } from "@/frontend/LivePreview";
 import type { LocalPhoto } from "@/frontend/ImageDropzone";
@@ -67,6 +68,8 @@ export default function Home() {
         semester: form.semester,
         title: form.title,
         date: form.date,
+        venue: form.venue,
+        participants: form.participants,
         acaRNo: form.acaRNo,
         revNo: form.revNo,
       },
@@ -142,11 +145,29 @@ export default function Home() {
 
   return (
     <main className="min-h-screen px-6 py-6 mx-auto max-w-[1400px]">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-ink">AutoReport</h1>
-        <p className="text-sm text-gray-600">
-          AI-generated activity reports for the AI & ML Club, Dhole Patil College of Engineering.
-        </p>
+      <header className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          <Image
+            src="/college-logo.svg"
+            alt="Dhole Patil Education Society"
+            width={629}
+            height={539}
+            className="h-[88px] w-auto shrink-0 self-start"
+          />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">
+              AI &amp; ML Club Report Generator
+            </p>
+            <h1 className="text-2xl font-semibold text-ink">
+              AutoReport
+            </h1>
+            <p className="text-sm text-gray-600">
+              Gemini-backed activity reports for Dhole Patil College of Engineering,
+              with live preview, PDF export, and DOCX export aligned to the provided
+              college format.
+            </p>
+          </div>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -175,7 +196,7 @@ export default function Home() {
       </div>
 
       <footer className="mt-10 text-xs text-gray-500">
-        Built with Next.js, OpenRouter, Puppeteer & docx.
+        Built with Next.js, Gemini, Puppeteer & docx.
       </footer>
     </main>
   );

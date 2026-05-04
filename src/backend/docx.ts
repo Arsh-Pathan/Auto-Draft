@@ -1,4 +1,6 @@
 import "server-only";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import {
   AlignmentType,
   BorderStyle,
@@ -19,6 +21,7 @@ import {
 import type { ReportPayload } from "@/types/report";
 import { formatDateLong } from "@/utils/formatDate";
 import { scaleToMaxWidth, type ProcessedImage } from "@/services/imagePipeline";
+import { CLUB_NAME } from "@/utils/constants";
 
 type CellOpts = { bold?: boolean; shaded?: boolean; width?: number };
 
@@ -97,11 +100,62 @@ function captionPara(text: string): Paragraph {
   });
 }
 
+async function buildHeaderBlock(): Promise<Paragraph[]> {
+  try {
+    const headerPng = await readFile(join(process.cwd(), "public", "report-header.png"));
+    const width = 520;
+    const height = Math.round((width * 432) / 2417);
+
+    return [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 120 },
+        children: [
+          new ImageRun({
+            data: headerPng,
+            transformation: { width, height },
+            type: "png",
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 180 },
+        border: { bottom: BORDER },
+        children: [
+          new TextRun({
+            text: `${CLUB_NAME} Activity Report`,
+            bold: true,
+            font: "Times New Roman",
+            size: 21,
+          }),
+        ],
+      }),
+    ];
+  } catch {
+    return [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 180 },
+        children: [
+          new TextRun({
+            text: `${CLUB_NAME} Activity Report`,
+            bold: true,
+            font: "Times New Roman",
+            size: 24,
+          }),
+        ],
+      }),
+    ];
+  }
+}
+
 export async function buildDocx(
   payload: ReportPayload,
   images: ProcessedImage[]
 ): Promise<Buffer> {
   const { meta, ai, signatories, photographs } = payload;
+  const headerBlock = await buildHeaderBlock();
 
   const headerTable = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -114,11 +168,12 @@ export async function buildDocx(
       insideVertical: BORDER,
     },
     rows: [
-      headerRow("College Name", meta.college),
       headerRow("Academic Year", meta.academicYear),
       headerRow("Semester", meta.semester),
-      headerRow("Report Title", meta.title),
+      headerRow("Event Title", meta.title),
       headerRow("Date", formatDateLong(meta.date)),
+      headerRow("Venue", meta.venue),
+      headerRow("Participants", meta.participants),
       headerRow("ACA/R No.", meta.acaRNo),
       headerRow("Rev No.", meta.revNo),
     ],
@@ -222,6 +277,7 @@ export async function buildDocx(
           },
         },
         children: [
+          ...headerBlock,
           headerTable,
           titleParagraph,
           sectionHeading("Overview"),

@@ -1,166 +1,113 @@
 # AutoReport
 
-AI-powered activity report generator for the **AI & ML Club, Dhole Patil College of Engineering (DPCOE)**.
+AutoReport generates AI & ML Club activity reports for Dhole Patil College of Engineering in PDF and DOCX format.
 
-Drop in messy notes from an event, attach a few photographs, and get back a polished DOCX or PDF that follows the official college report format — header table, structured sections, captioned photos, and the three-signature footer — every time.
-
----
+The app takes rough event notes plus photographs, rewrites the narrative with Gemini, and renders the output into the college-style report shell used by the live preview, PDF export, and DOCX export.
 
 ## Features
 
-- **Drag-and-drop image upload** with per-image captions.
-- **Live A4 preview** that mirrors the printed PDF exactly (rendered in an isolated iframe).
-- **AI rewriting** via [OpenRouter](https://openrouter.ai) — converts unstructured notes into formal, third-person, past-tense report prose.
-- **Editable AI output** — every paragraph and bullet is editable before download.
-- **DOCX + PDF export** from the same data contract:
-  - PDF via headless Chromium (Puppeteer) using a shared HTML/CSS template.
-  - DOCX via the [`docx`](https://www.npmjs.com/package/docx) package, structurally parallel to the HTML.
-- **Strict format compliance** — header table, centered title, Overview / Program Details / Overall Outcome, "Photographs:" section, and Club Advisor / SDP Head / Principal sign blocks.
-
----
+- Gemini-based structured report generation
+- Live A4 preview in the browser
+- Shared report format across preview and PDF
+- DOCX export with the same metadata, photographs, and signatories
+- Official college header asset and logo support
+- Editable AI output before download
 
 ## Tech stack
 
-| Layer            | Choice                                              |
-| ---------------- | --------------------------------------------------- |
-| Framework        | Next.js 15 (App Router) + React 19                  |
-| Language         | TypeScript                                          |
-| Styling          | Tailwind CSS                                        |
-| AI               | OpenRouter Chat Completions (JSON mode)             |
-| PDF              | Puppeteer (bundled Chromium)                        |
-| DOCX             | `docx` (officegen-style builder)                    |
-| Validation       | Zod                                                 |
-| Image dimensions | `image-size`                                        |
-
----
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Gemini API (`models.generateContent`)
+- Puppeteer
+- `docx`
+- Zod
 
 ## Project layout
 
-```
+```text
 src/
-├─ app/                   # Next.js App Router (pages + API routes)
-│  ├─ page.tsx            # form + live preview screen
-│  └─ api/
-│     ├─ generate/        # POST: messy notes → structured AI JSON
-│     ├─ pdf/             # POST: payload + photos → PDF download
-│     └─ docx/            # POST: payload + photos → DOCX download
-├─ frontend/              # client components: form, dropzone, preview
-├─ components/ui/         # primitives (Button, Field, TextArea)
-├─ backend/               # server-only modules (openrouter, pdf, docx)
-├─ services/              # generateReport, renderHtml, imagePipeline
-├─ templates/             # report.html.ts + report.css.ts (single source of truth)
-├─ utils/                 # constants, dates, filenames
-└─ types/                 # ReportData / ReportPayload + Zod schema
+  app/                   Next.js App Router pages and API routes
+  backend/               server-only integrations (gemini, pdf, docx)
+  components/ui/         shared form primitives
+  frontend/              client components
+  services/              orchestration and image processing
+  templates/             shared report HTML and CSS
+  types/                 Zod schema and payload types
+  utils/                 constants, date helpers, filenames
+public/
+  report-header.png      official report header banner
+  college-logo.svg       official college logo
+example/                 user-provided reference assets
 ```
-
-The split into `frontend/`, `backend/`, `components/`, `services/`, `templates/`, and `utils/` follows the brief; App Router lives in `app/` because Next.js requires it.
-
----
 
 ## Setup
 
-### 1. Prerequisites
-
-- Node.js **20.x or newer**
-- npm (or pnpm / yarn — pick one)
-- An **OpenRouter API key** — sign up at <https://openrouter.ai>.
-
-### 2. Install
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-The `puppeteer` install will download a matching Chromium build (~170 MB). On Windows, if your home directory is OneDrive-synced or aggressively scanned by antivirus, point the cache inside the repo with the env var below.
-
-### 3. Configure environment
+2. Copy the example env file:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local`:
+3. Fill in `.env.local`:
 
-```
-OPENROUTER_API_KEY=sk-or-v1-...
-OPENROUTER_MODEL=openrouter/auto
-OPENROUTER_APP_NAME=AutoReport
-OPENROUTER_SITE_URL=http://localhost:3000
-
-# Windows-friendly: keep Chromium inside the repo
+```env
+GEMINI_API_KEY=your_api_key
+GEMINI_MODEL=gemini-2.0-flash
 PUPPETEER_CACHE_DIR=./.cache/puppeteer
 ```
 
-| Variable              | Required | Notes                                                                                |
-| --------------------- | -------- | ------------------------------------------------------------------------------------ |
-| `OPENROUTER_API_KEY`  | yes      | Server-only. Never prefix with `NEXT_PUBLIC_`.                                       |
-| `OPENROUTER_MODEL`    | no       | Default: `openrouter/auto` (OpenRouter picks the best-fit model per request). Override with any specific model id. |
-| `OPENROUTER_APP_NAME` | no       | Shown in your OpenRouter usage dashboard.                                            |
-| `OPENROUTER_SITE_URL` | no       | Same — used as the `HTTP-Referer` header.                                            |
-| `PUPPETEER_CACHE_DIR` | no       | Recommended on Windows; keeps Chromium out of `%USERPROFILE%`.                       |
-
-### 4. Run
+4. Start the app:
 
 ```bash
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+## Report flow
 
----
+1. The user enters event details, raw notes, and optional photographs.
+2. `POST /api/generate` calls Gemini and requests strict JSON output.
+3. The response is validated with Zod and shown in editable textareas.
+4. The live preview renders the same HTML template used by the PDF route.
+5. The PDF route uses Puppeteer and the DOCX route uses `docx`.
 
-## How report generation works
+## Format notes
 
-1. **User fills the form** — event title, date, venue, participants, highlights, free-form description, and optional photos with captions.
-2. **AI step (`POST /api/generate`)** — `services/generateReport.ts` builds a system + user prompt and calls OpenRouter with `response_format: { type: "json_object" }`. The result is parsed and validated with Zod (`ReportDataSchema`). On schema failure the model is asked once more with the validation error appended; a second failure raises an error.
-3. **Editable preview** — the AI's `overview`, `programDetails.{description,bullets}`, and `outcome` populate textareas the user can freely edit. The right-hand iframe re-renders the report HTML on every keystroke (debounced ~150 ms).
-4. **Download** — clicking *Download PDF* or *Download DOCX* posts a `multipart/form-data` body with the JSON payload and raw image files:
-   - **PDF route** (`/api/pdf`): inlines images as data URLs, calls `templates/report.html.ts` to build the HTML, renders via Puppeteer with `format: 'A4', preferCSSPageSize: true, printBackground: true`.
-   - **DOCX route** (`/api/docx`): hands the payload + processed image buffers to `backend/docx.ts`, which builds the document section-by-section with `Table`, `Paragraph`, and `ImageRun`.
-5. **Filename** — both downloads use `AI & ML Club Report DD_MM_YYYY.{pdf,docx}` (matching the sample report's convention) via `utils/filename.ts` with proper `Content-Disposition` encoding for the `&`.
+The report format is aligned to the provided college references:
 
-The header table, "Photographs:" section, and three-signature footer are **never** AI-generated — they come from form fields and `utils/constants.ts`. The AI is only responsible for the prose in the three content sections.
+- top header banner
+- metadata table
+- centered event title
+- overview, program details, and overall outcome sections
+- photograph grid with captions
+- three-signature footer
 
----
+If the format changes, update both `src/templates/report.html.ts` and `src/backend/docx.ts`.
 
-## Format guarantees
+## Commands
 
-The shared template enforces:
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
 
-- **Header table** with: College Name, Academic Year, Semester, Report Title, Date, ACA/R No., Rev No.
-- **Centered, bold, underlined title**.
-- **Three sections in order**: Overview → Program Details (paragraph + bullet list) → Overall Outcome.
-- **Photographs section** titled `Photographs:` with each image followed by an italic centered caption.
-- **Three-block signature footer**: Club Advisor · SDP Head · Principal.
+## Commit convention
 
-To change the college name, ACA/R number, or default signatories edit `src/utils/constants.ts`.
+Use professional conventional commits in this repo, for example:
 
----
+- `feat: switch report generation to gemini`
+- `fix: align pdf and docx header layout`
+- `docs: update claude guidance for commit style`
 
-## Known issues / deployment notes
+## Notes
 
-- **Vercel + Puppeteer**: full `puppeteer` exceeds Vercel's serverless function size limit. For deployment, swap to `puppeteer-core` + [`@sparticuz/chromium`](https://github.com/Sparticuz/chromium) and set `runtime = 'nodejs'` with `maxDuration = 60`.
-- **Chromium cold start**: `backend/pdf.ts` caches a launched browser on `globalThis` so the first PDF takes ~700 ms and subsequent renders are <300 ms. The browser is closed on `SIGTERM`/`SIGINT`.
-- **Fonts**: the report specifies `Times New Roman, Liberation Serif, serif`. On Linux Chromium it falls back to Liberation Serif (visually similar).
-- **Body size**: large image batches may exceed Vercel's 4.5 MB request cap. Locally there is no such limit (`bodySizeLimit: 25mb` in `next.config.mjs`).
-
----
-
-## Conventional commits used in this repo
-
-```
-chore: scaffold next.js with typescript and tailwind
-feat:  add report data types, zod schema, and constants
-feat:  build report form, dropzone, and live preview
-feat:  integrate openrouter for structured ai generation
-feat:  add shared html template for preview and pdf
-feat:  add pdf export via puppeteer
-feat:  add docx export with header table and signatures
-docs:  add readme, env example, and known issues
-```
-
----
-
-## License
-
-Built for the AI & ML Club at Dhole Patil College of Engineering. Internal academic use.
+- Node 20+ is required.
+- There is no test runner configured.
+- For Windows, keeping `PUPPETEER_CACHE_DIR` inside the repo helps avoid OneDrive and antivirus cache issues.

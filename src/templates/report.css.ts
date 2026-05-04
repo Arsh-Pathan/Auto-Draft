@@ -1,5 +1,5 @@
 export const REPORT_CSS = `
-  @page { size: A4; margin: 18mm 18mm 20mm 18mm; }
+  @page { size: A4; margin: 14mm 14mm 18mm 14mm; }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
@@ -12,37 +12,58 @@ export const REPORT_CSS = `
   }
   .report {
     padding: 0;
-    max-width: 174mm;
+    max-width: 182mm;
     margin: 0 auto;
+  }
+  .masthead {
+    margin-bottom: 10pt;
+    page-break-inside: avoid;
+  }
+  .masthead-banner {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .report-shell {
+    border: 1.4pt solid #111827;
+    padding: 10pt 12pt 16pt;
+  }
+  .report-label {
+    margin-bottom: 10pt;
+    padding-bottom: 6pt;
+    border-bottom: 1pt solid #111827;
+    text-align: center;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   table.header {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 14pt;
+    margin-bottom: 10pt;
     page-break-inside: avoid;
   }
   table.header th, table.header td {
     border: 1px solid #111827;
-    padding: 5pt 8pt;
+    padding: 4.5pt 7pt;
     text-align: left;
     vertical-align: middle;
-    font-size: 11pt;
+    font-size: 10.5pt;
   }
   table.header th {
-    background: #f3f4f6;
     font-weight: 700;
-    width: 28%;
+    width: 27%;
   }
   h1.title {
     text-align: center;
     font-size: 16pt;
     font-weight: 700;
-    text-transform: capitalize;
-    margin: 18pt 0 14pt;
+    margin: 16pt 0 12pt;
     text-decoration: underline;
   }
   h2.section {
-    font-size: 13pt;
+    font-size: 12.5pt;
     font-weight: 700;
     margin: 14pt 0 6pt;
     text-decoration: underline;

@@ -1,6 +1,6 @@
 import "server-only";
 import { ReportDataSchema, type ReportData } from "@/types/report";
-import { callOpenRouter, type ChatMessage } from "@/backend/openrouter";
+import { callGemini, type ChatMessage } from "@/backend/gemini";
 
 const SYSTEM_PROMPT = `You are a formal academic report writer for the AI & ML Club at Dhole Patil College of Engineering. Convert the user's messy notes into a structured event report.
 
@@ -16,6 +16,28 @@ Return ONLY a JSON object matching this schema. No prose, no markdown, no code f
   },
   "outcome": string                          // 50-100 words: skills gained, takeaways, impact
 }`;
+
+const REPORT_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    overview: { type: "string" },
+    programDetails: {
+      type: "object",
+      properties: {
+        description: { type: "string" },
+        bullets: {
+          type: "array",
+          items: { type: "string" },
+          minItems: 4,
+          maxItems: 8,
+        },
+      },
+      required: ["description", "bullets"],
+    },
+    outcome: { type: "string" },
+  },
+  required: ["overview", "programDetails", "outcome"],
+} as const;
 
 export type GenerateInput = {
   title: string;
@@ -48,11 +70,11 @@ export async function generateReport(input: GenerateInput): Promise<ReportData> 
     { role: "user", content: buildUserMessage(input) },
   ];
 
-  let raw = await callOpenRouter(messages);
+  let raw = await callGemini(messages, REPORT_JSON_SCHEMA);
   let parsed: unknown;
   try {
     parsed = tryParseJson(raw);
-  } catch (err) {
+  } catch {
     parsed = null;
   }
 
@@ -65,7 +87,7 @@ export async function generateReport(input: GenerateInput): Promise<ReportData> 
         "Your previous reply did not match the schema. Reply again with ONLY the JSON object, no prose. Validation error: " +
         result.error.message,
     });
-    raw = await callOpenRouter(messages);
+    raw = await callGemini(messages, REPORT_JSON_SCHEMA);
     try {
       parsed = tryParseJson(raw);
     } catch {

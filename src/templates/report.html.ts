@@ -1,6 +1,7 @@
 import type { ReportPayload } from "@/types/report";
 import { REPORT_CSS } from "./report.css";
 import { formatDateLong } from "@/utils/formatDate";
+import { CLUB_NAME } from "@/utils/constants";
 
 function escapeHtml(s: string): string {
   return s
@@ -15,16 +16,31 @@ function row(label: string, value: string): string {
   return `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`;
 }
 
-export function renderReportHtml(payload: ReportPayload): string {
+function escapeAttribute(s: string): string {
+  return escapeHtml(s);
+}
+
+type RenderOptions = {
+  assetBaseUrl?: string;
+};
+
+function normalizeAssetBaseUrl(assetBaseUrl?: string): string {
+  if (!assetBaseUrl) return "http://localhost:3000/";
+  return assetBaseUrl.endsWith("/") ? assetBaseUrl : `${assetBaseUrl}/`;
+}
+
+export function renderReportHtml(payload: ReportPayload, options: RenderOptions = {}): string {
   const { meta, ai, photographs, signatories } = payload;
+  const assetBaseUrl = normalizeAssetBaseUrl(options.assetBaseUrl);
   const headerTable = `
     <table class="header">
       <tbody>
-        ${row("College Name", meta.college)}
         ${row("Academic Year", meta.academicYear)}
         ${row("Semester", meta.semester)}
-        ${row("Report Title", meta.title)}
+        ${row("Event Title", meta.title)}
         ${row("Date", formatDateLong(meta.date))}
+        ${row("Venue", meta.venue)}
+        ${row("Participants", meta.participants)}
         ${row("ACA/R No.", meta.acaRNo)}
         ${row("Rev No.", meta.revNo)}
       </tbody>
@@ -59,35 +75,43 @@ export function renderReportHtml(payload: ReportPayload): string {
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(meta.title)}</title>
+  <base href="${escapeAttribute(assetBaseUrl)}" />
   <style>${REPORT_CSS}</style>
 </head>
 <body>
   <main class="report">
-    ${headerTable}
-    <h1 class="title">${escapeHtml(meta.title)}</h1>
+    <header class="masthead">
+      <img class="masthead-banner" src="report-header.png" alt="Dhole Patil College header" />
+    </header>
 
-    <section>
-      <h2 class="section">Overview</h2>
-      <p>${escapeHtml(ai.overview)}</p>
-    </section>
+    <section class="report-shell">
+      <div class="report-label">${escapeHtml(CLUB_NAME)} Activity Report</div>
+      ${headerTable}
+      <h1 class="title">${escapeHtml(meta.title)}</h1>
 
-    <section>
-      <h2 class="section">Program Details</h2>
-      <p>${escapeHtml(ai.programDetails.description)}</p>
-      <ul class="bullets">${bullets}</ul>
-    </section>
+      <section>
+        <h2 class="section">Overview</h2>
+        <p>${escapeHtml(ai.overview)}</p>
+      </section>
 
-    <section>
-      <h2 class="section">Overall Outcome</h2>
-      <p>${escapeHtml(ai.outcome)}</p>
-    </section>
+      <section>
+        <h2 class="section">Program Details</h2>
+        <p>${escapeHtml(ai.programDetails.description)}</p>
+        <ul class="bullets">${bullets}</ul>
+      </section>
 
-    ${photos}
+      <section>
+        <h2 class="section">Overall Outcome</h2>
+        <p>${escapeHtml(ai.outcome)}</p>
+      </section>
 
-    <section class="signatures">
-      <div class="sig">${escapeHtml(signatories.advisor)}</div>
-      <div class="sig">${escapeHtml(signatories.sdpHead)}</div>
-      <div class="sig">${escapeHtml(signatories.principal)}</div>
+      ${photos}
+
+      <section class="signatures">
+        <div class="sig">${escapeHtml(signatories.advisor)}</div>
+        <div class="sig">${escapeHtml(signatories.sdpHead)}</div>
+        <div class="sig">${escapeHtml(signatories.principal)}</div>
+      </section>
     </section>
   </main>
 </body>

@@ -26,11 +26,13 @@ export async function POST(req: Request) {
       src: processed[i]?.dataUrl || p.src,
     }));
 
-    const html = renderReportHtml(payload);
+    const html = renderReportHtml(payload, {
+      assetBaseUrl: `${new URL(req.url).origin}/`,
+    });
     const pdf = await htmlToPdf(html);
 
     const filename = reportFilename(payload.meta.date, "pdf");
-    return new NextResponse(pdf, {
+    return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"; filename*=UTF-8''${rfc5987(filename)}`,
