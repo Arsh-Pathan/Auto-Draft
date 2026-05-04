@@ -3,19 +3,18 @@ export const REPORT_CSS = `
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
-    padding: 20px;
-    background: #f3f4f6;
+    padding: 10px;
+    background: #ffffff;
     color: #111827;
     font-family: 'Calibri', sans-serif;
     font-size: 12pt;
     line-height: 1.45;
   }
   .report {
-    padding: 12mm;
+    padding: 0;
     max-width: 210mm;
     margin: 0 auto;
     background: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   .report-inner {
     border: 4px double #111827;
