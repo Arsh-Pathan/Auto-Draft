@@ -6,7 +6,7 @@ export const REPORT_CSS = `
     padding: 0;
     background: #ffffff;
     color: #111827;
-    font-family: 'Times New Roman', 'Liberation Serif', serif;
+    font-family: 'Calibri', sans-serif;
     font-size: 12pt;
     line-height: 1.45;
   }

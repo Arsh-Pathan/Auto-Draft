@@ -48,7 +48,7 @@ function headerCell(text: string, opts: { rowSpan?: number; width?: number; alig
     children: [
       new Paragraph({
         alignment: opts.alignLeft ? AlignmentType.LEFT : AlignmentType.CENTER,
-        children: [new TextRun({ text, bold: true, font: "Times New Roman", size: 24 })],
+        children: [new TextRun({ text, bold: true, font: "Calibri", size: 24 })],
       }),
     ],
   });
@@ -62,7 +62,7 @@ function sectionHeading(text: string): Paragraph {
         text,
         bold: true,
         size: 26,
-        font: "Times New Roman",
+        font: "Calibri",
         underline: { type: UnderlineType.SINGLE },
       }),
     ],
@@ -73,7 +73,7 @@ function bodyParagraph(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.JUSTIFIED,
     spacing: { after: 120 },
-    children: [new TextRun({ text, font: "Times New Roman", size: 24 })],
+    children: [new TextRun({ text, font: "Calibri", size: 24 })],
   });
 }
 
@@ -81,7 +81,7 @@ function bullet(text: string): Paragraph {
   return new Paragraph({
     bullet: { level: 0 },
     spacing: { after: 80 },
-    children: [new TextRun({ text, font: "Times New Roman", size: 24 })],
+    children: [new TextRun({ text, font: "Calibri", size: 24 })],
   });
 }
 
@@ -90,7 +90,7 @@ function captionPara(text: string): Paragraph {
     alignment: AlignmentType.CENTER,
     spacing: { before: 60, after: 200 },
     children: [
-      new TextRun({ text, italics: true, font: "Times New Roman", size: 20 }),
+      new TextRun({ text, italics: true, font: "Calibri", size: 20 }),
     ],
   });
 }
@@ -137,22 +137,22 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
                   spacing: { after: 60 },
-                  children: [new TextRun({ text: "DHOLE PATIL COLLEGE OF ENGINEERING", bold: true, size: 30, font: "Times New Roman" })],
+                  children: [new TextRun({ text: "DHOLE PATIL COLLEGE OF ENGINEERING", bold: true, size: 30, font: "Calibri" })],
                 }),
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
                   spacing: { after: 40 },
-                  children: [new TextRun({ text: "Accredited with Grade A+ by NAAC", bold: true, size: 16, font: "Times New Roman" })],
+                  children: [new TextRun({ text: "Accredited with Grade A+ by NAAC", bold: true, size: 16, font: "Calibri" })],
                 }),
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
                   spacing: { after: 40 },
-                  children: [new TextRun({ text: "ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,", bold: true, size: 16, font: "Times New Roman" })],
+                  children: [new TextRun({ text: "ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,", bold: true, size: 16, font: "Calibri" })],
                 }),
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
                   spacing: { after: 120 },
-                  children: [new TextRun({ text: "D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.", bold: true, size: 16, font: "Times New Roman" })],
+                  children: [new TextRun({ text: "D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.", bold: true, size: 16, font: "Calibri" })],
                 }),
               ],
             }),
@@ -171,7 +171,7 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
           new TextRun({
             text: `${CLUB_NAME} Activity Report`,
             bold: true,
-            font: "Times New Roman",
+            font: "Calibri",
             size: 21,
           }),
         ],
@@ -186,7 +186,7 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
           new TextRun({
             text: `${CLUB_NAME} Activity Report`,
             bold: true,
-            font: "Times New Roman",
+            font: "Calibri",
             size: 24,
           }),
         ],
@@ -244,7 +244,7 @@ export async function buildDocx(
         text: meta.title,
         bold: true,
         size: 32,
-        font: "Times New Roman",
+        font: "Calibri",
         underline: { type: UnderlineType.SINGLE },
       }),
     ],
@@ -303,7 +303,7 @@ export async function buildDocx(
                     new TextRun({
                       text: name,
                       bold: true,
-                      font: "Times New Roman",
+                      font: "Calibri",
                       size: 22,
                     }),
                   ],
@@ -321,7 +321,7 @@ export async function buildDocx(
     styles: {
       default: {
         document: {
-          run: { font: "Times New Roman", size: 24 },
+          run: { font: "Calibri", size: 24 },
         },
       },
     },
