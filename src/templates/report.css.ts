@@ -3,8 +3,8 @@ export const REPORT_CSS = `
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
-    padding: 0;
-    background: #ffffff;
+    padding: 20px;
+    background: #f3f4f6;
     color: #111827;
     font-family: 'Calibri', sans-serif;
     font-size: 12pt;
@@ -14,7 +14,9 @@ export const REPORT_CSS = `
     padding: 12mm;
     max-width: 182mm;
     margin: 0 auto;
+    background: #ffffff;
     border: 4px double #111827;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   .masthead {
     margin-bottom: 10pt;
