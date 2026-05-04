@@ -12,11 +12,14 @@ export const REPORT_CSS = `
   }
   .report {
     padding: 12mm;
-    max-width: 182mm;
+    max-width: 210mm;
     margin: 0 auto;
     background: #ffffff;
-    border: 4px double #111827;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .report-inner {
+    border: 4px double #111827;
+    padding: 12mm;
   }
   .masthead {
     margin-bottom: 10pt;

@@ -84,47 +84,49 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 </head>
 <body>
   <main class="report">
-    <header class="masthead" style="display: flex; align-items: center; border-bottom: 1.5px solid black; padding-bottom: 10px; margin-bottom: 20px;">
-      <div style="flex: 0 0 auto; margin-right: 20px;">
-        <img class="masthead-logo" src="logo.svg" alt="Dhole Patil Education Society" style="width: 160px; height: auto;" />
-      </div>
-      <div style="flex: 1; text-align: left;">
-        <div style="font-size: 16pt; font-weight: 800; color: #000; line-height: 1.2;">DHOLE PATIL COLLEGE OF ENGINEERING</div>
-        <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3; margin-top: 2px;">Accredited with Grade A+ by NAAC</div>
-        <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3;">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
-        <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3;">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
-      </div>
-    </header>
+    <div class="report-inner">
+      <header class="masthead" style="display: flex; align-items: center; border-bottom: 1.5px solid black; padding-bottom: 10px; margin-bottom: 20px;">
+        <div style="flex: 0 0 auto; margin-right: 20px;">
+          <img class="masthead-logo" src="logo.svg" alt="Dhole Patil Education Society" style="width: 160px; height: auto;" />
+        </div>
+        <div style="flex: 1; text-align: left;">
+          <div style="font-size: 16pt; font-weight: 800; color: #000; line-height: 1.2;">DHOLE PATIL COLLEGE OF ENGINEERING</div>
+          <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3; margin-top: 2px;">Accredited with Grade A+ by NAAC</div>
+          <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3;">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
+          <div style="font-size: 8pt; font-weight: 700; color: #000; line-height: 1.3;">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
+        </div>
+      </header>
 
-    <section class="report-shell">
-      <div class="report-label">${escapeHtml(CLUB_NAME)} Activity Report</div>
-      ${headerTable}
-      <h1 class="title">${escapeHtml(meta.title)}</h1>
+      <section class="report-shell">
+        <div class="report-label">${escapeHtml(CLUB_NAME)} Activity Report</div>
+        ${headerTable}
+        <h1 class="title">${escapeHtml(meta.title)}</h1>
 
-      <section>
-        <h2 class="section">Overview</h2>
-        <p>${escapeHtml(ai.overview)}</p>
+        <section>
+          <h2 class="section">Overview</h2>
+          <p>${escapeHtml(ai.overview)}</p>
+        </section>
+
+        <section>
+          <h2 class="section">Program Details</h2>
+          <p>${escapeHtml(ai.programDetails.description)}</p>
+          <ul class="bullets">${bullets}</ul>
+        </section>
+
+        <section>
+          <h2 class="section">Overall Outcome</h2>
+          <p>${escapeHtml(ai.outcome)}</p>
+        </section>
+
+        ${photos}
+
+        <section class="signatures">
+          <div class="sig">${escapeHtml(signatories.advisor)}</div>
+          <div class="sig">${escapeHtml(signatories.sdpHead)}</div>
+          <div class="sig">${escapeHtml(signatories.principal)}</div>
+        </section>
       </section>
-
-      <section>
-        <h2 class="section">Program Details</h2>
-        <p>${escapeHtml(ai.programDetails.description)}</p>
-        <ul class="bullets">${bullets}</ul>
-      </section>
-
-      <section>
-        <h2 class="section">Overall Outcome</h2>
-        <p>${escapeHtml(ai.outcome)}</p>
-      </section>
-
-      ${photos}
-
-      <section class="signatures">
-        <div class="sig">${escapeHtml(signatories.advisor)}</div>
-        <div class="sig">${escapeHtml(signatories.sdpHead)}</div>
-        <div class="sig">${escapeHtml(signatories.principal)}</div>
-      </section>
-    </section>
+    </div>
   </main>
 </body>
 </html>`;
