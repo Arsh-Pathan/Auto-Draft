@@ -84,7 +84,6 @@ export const REPORT_CSS = `
   .report-label {
     margin-bottom: 10pt;
     padding-bottom: 6pt;
-    border-bottom: 1pt solid #111827;
     text-align: center;
     font-size: 10pt;
     font-weight: 700;

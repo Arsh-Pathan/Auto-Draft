@@ -166,7 +166,6 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 120, after: 180 },
-        border: { bottom: BORDER },
         children: [
           new TextRun({
             text: `${CLUB_NAME} Activity Report`,
