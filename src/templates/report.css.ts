@@ -58,7 +58,7 @@ export const REPORT_CSS = `
     }
   }
 
-  section, p, li, ul, ol {
+  .ai-section, p, li, ul, ol {
     page-break-inside: avoid;
     break-inside: avoid;
   }
