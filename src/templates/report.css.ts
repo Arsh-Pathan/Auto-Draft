@@ -17,51 +17,54 @@ export const REPORT_CSS = `
       zoom: 0.95;
     }
     .report {
-      display: flex;
-      flex-direction: column;
       position: relative;
       width: 210mm;
       min-height: 297mm;
       margin: 0 auto;
-      background-color: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 10mm;
-      box-sizing: border-box;
+      background: transparent;
     }
-    /* Draw gray gaps every 297mm to simulate separate physical pages */
-    .report::after {
-      content: "";
+    /* Container for absolutely-positioned page frame divs */
+    #page-frames {
       position: absolute;
       top: 0;
-      left: -20mm;
-      right: -20mm;
-      bottom: 0;
+      left: 0;
+      right: 0;
       pointer-events: none;
-      z-index: 50;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 297mm,
-        #e5e7eb 297mm,
-        #e5e7eb 310mm
-      );
+      z-index: 0;
+    }
+    /* Each .page-frame is a complete white A4 page with double-border */
+    .page-frame {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 297mm;
+      background: #fff;
+      border: 2px solid #000;
+      box-sizing: border-box;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    /* Inner border inset */
+    .page-frame::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid #000;
+      pointer-events: none;
+    }
+    /* Content flows on top of the frames */
+    .report-content {
+      position: relative;
+      z-index: 1;
+      /* Match frame: 2px outer border + 4px gap + 1px inner border + 12mm content padding */
+      padding: 12mm 14mm;
     }
   }
 
   @media print {
-    html, body {
-      background: #ffffff;
-    }
-    .report {
-      width: 100%;
-      padding: 0;
-    }
-    .report-outer-border {
-      border: none !important;
-    }
-    .report-inner-border {
-      border: none !important;
-    }
+    html, body { background: #fff; }
+    #page-frames { display: none; }
+    .report { background: #fff; min-height: 0; }
+    .report-content { padding: 0; }
     body::before {
       content: "";
       position: fixed;
@@ -80,38 +83,6 @@ export const REPORT_CSS = `
     }
   }
 
-  .ai-section, p, li, ul, ol {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    page-break-after: avoid;
-    break-after: avoid;
-  }
-
-  .report-outer-border {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border: 2px solid #000;
-    padding: 4px;
-    box-sizing: border-box;
-  }
-  .report-inner-border {
-    flex: 1;
-    display: block;
-    border: 1px solid #000;
-    padding: 12mm 14mm;
-    box-sizing: border-box;
-  }
-  
-  .content-wrapper {
-    height: max-content;
-  }
-  
   .masthead {
     display: flex;
     align-items: center;

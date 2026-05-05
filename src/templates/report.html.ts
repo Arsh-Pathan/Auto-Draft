@@ -89,64 +89,63 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 </head>
 <body>
   <main class="report">
-    <div class="report-outer-border">
-      <div class="report-inner-border">
-        <div class="content-wrapper">
-          <table class="masthead-table" style="width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 15pt; margin-bottom: 25pt;">
-          <tr>
-            <td style="width: 25%; vertical-align: top; text-align: left; padding-left: 10pt;">
-              <img src="/logo.png" alt="DPES Logo" style="width: 120px; height: auto;" />
-            </td>
-            <td style="width: 75%; vertical-align: top; text-align: left; padding-top: 15pt; padding-left: 60pt;">
-              <div style="font-size: 15pt; font-weight: bold; line-height: 1.1; margin-bottom: 6pt; font-family: 'Calibri', sans-serif;">DHOLE PATIL COLLEGE OF ENGINEERING</div>
-              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">Accredited with Grade A+ by NAAC</div>
-              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
-              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
-            </td>
-          </tr>
+    <!-- Page frames are injected here by JS -->
+    <div id="page-frames" aria-hidden="true"></div>
+    <!-- All content in a single relative flow on top of the frames -->
+    <div class="report-content">
+      <table class="masthead-table" style="width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 15pt; margin-bottom: 25pt;">
+        <tr>
+          <td style="width: 25%; vertical-align: top; text-align: left; padding-left: 10pt;">
+            <img src="/logo.png" alt="DPES Logo" style="width: 120px; height: auto;" />
+          </td>
+          <td style="width: 75%; vertical-align: top; text-align: left; padding-top: 15pt; padding-left: 60pt;">
+            <div style="font-size: 15pt; font-weight: bold; line-height: 1.1; margin-bottom: 6pt; font-family: 'Calibri', sans-serif;">DHOLE PATIL COLLEGE OF ENGINEERING</div>
+            <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">Accredited with Grade A+ by NAAC</div>
+            <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
+            <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
+          </td>
+        </tr>
+      </table>
+
+      <section class="report-shell">
+        <table class="header-table">
+          <tbody>
+            <tr>
+              <td style="width: 25%;"><strong>ACA/R / 56</strong></td>
+              <td rowspan="2" style="width: 50%; text-align: center; vertical-align: middle; border-bottom: 1px solid black;"><strong>Dhole Patil College of Engineering</strong></td>
+              <td style="width: 25%;"><strong>AcademicYear:${escapeHtml(meta.academicYear)}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Rev: 00</strong></td>
+              <td><strong>Semester: ${escapeHtml(meta.semester)}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Date: 15.12.2016</strong></td>
+              <td style="text-align: center;"><strong>Report</strong></td>
+              <td><strong>Date- ${formatDateShort(meta.date)}</strong></td>
+            </tr>
+          </tbody>
         </table>
 
-        <section class="report-shell">
-          <table class="header-table">
-            <tbody>
-              <tr>
-                <td style="width: 25%;"><strong>ACA/R / 56</strong></td>
-                <td rowspan="2" style="width: 50%; text-align: center; vertical-align: middle; border-bottom: 1px solid black;"><strong>Dhole Patil College of Engineering</strong></td>
-                <td style="width: 25%;"><strong>AcademicYear:${escapeHtml(meta.academicYear)}</strong></td>
-              </tr>
-              <tr>
-                <td><strong>Rev: 00</strong></td>
-                <td><strong>Semester: ${escapeHtml(meta.semester)}</strong></td>
-              </tr>
-              <tr>
-                <td><strong>Date: 15.12.2016</strong></td>
-                <td style="text-align: center;"><strong>Report</strong></td>
-                <td><strong>Date- ${formatDateShort(meta.date)}</strong></td>
-              </tr>
-            </tbody>
-          </table>
+        <h1 class="title"><u>${escapeHtml(meta.title)}</u></h1>
 
-          <h1 class="title"><u>${escapeHtml(meta.title)}</u></h1>
+        ${sectionsHtml}
 
-          ${sectionsHtml}
-
-          <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid;">
-            <div class="sig-col">
-              <strong>Club Advisor</strong><br/>
-              ${escapeHtml(signatories.advisor)}
-            </div>
-            <div class="sig-col">
-              <strong>SDP Head</strong><br/>
-              ${escapeHtml(signatories.sdpHead)}
-            </div>
-            <div class="sig-col">
-              <strong>Principal</strong><br/>
-              ${escapeHtml(signatories.principal)}
-            </div>
-          </section>
-          </section>
-        </div>
-      </div>
+        <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid;">
+          <div class="sig-col">
+            <strong>Club Advisor</strong><br/>
+            ${escapeHtml(signatories.advisor)}
+          </div>
+          <div class="sig-col">
+            <strong>SDP Head</strong><br/>
+            ${escapeHtml(signatories.sdpHead)}
+          </div>
+          <div class="sig-col">
+            <strong>Principal</strong><br/>
+            ${escapeHtml(signatories.principal)}
+          </div>
+        </section>
+      </section>
     </div>
   </main>
   <script>
@@ -172,59 +171,46 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
       }, 500);
     });
 
-    // Automatically stretch the borders to complete the simulated A4 page
-    function fixPageHeight() {
+    // Draw one complete page-frame rect per simulated A4 page behind the content
+    const pxPerMm = 3.779527559;
+    const pageHeightMm = 297;
+    const gapMm = 13;
+    const pageIntervalMm = pageHeightMm + gapMm;
+
+    function buildPageFrames() {
       const report = document.querySelector('.report');
-      const outer = document.querySelector('.report-outer-border');
-      const inner = document.querySelector('.report-inner-border');
-      const wrapper = document.querySelector('.content-wrapper');
-      if (!report || !outer || !inner || !wrapper) return;
+      const content = document.querySelector('.report-content');
+      const framesEl = document.getElementById('page-frames');
+      if (!report || !content || !framesEl) return;
 
-      // 1mm ~ 3.7795px at 96dpi
-      const pxPerMm = 3.779527559;
+      const contentH = content.getBoundingClientRect().height;
+      const pages = Math.max(1, Math.ceil(contentH / (pageHeightMm * pxPerMm)));
 
-      // Temporarily reset to measure natural wrapper height
-      report.style.height = 'auto';
-      report.style.minHeight = '297mm';
-      outer.style.height = 'auto';
-      inner.style.height = 'auto';
+      const totalMm = pages * pageIntervalMm - gapMm;
+      report.style.minHeight = totalMm + 'mm';
 
-      // Force layout recalculation then measure
-      requestAnimationFrame(() => {
-        const contentHeight = wrapper.getBoundingClientRect().height;
-        // Add padding: .report (10mm*2) + .outer (4px*2) + .inner (12mm*2) ≈ 24mm + 8px ≈ 48mm
-        const paddingPx = 48 * pxPerMm;
-        const totalNeeded = contentHeight + paddingPx;
-
-        // Pages of 297mm each, with 13mm simulated gap between = 310mm intervals
-        const pageIntervalPx = 310 * pxPerMm;
-        const pages = Math.max(1, Math.ceil(totalNeeded / pageIntervalPx));
-        const requiredMm = (pages * 310) - 13;
-
-        // Set fixed height so flex children (outer, inner) stretch to fill
-        report.style.height = requiredMm + 'mm';
-        report.style.minHeight = requiredMm + 'mm';
-
-        // Explicitly fill outer border: report height minus 2*10mm padding
-        const outerH = requiredMm - 20;
-        outer.style.height = outerH + 'mm';
-
-        // Inner border: outer height minus 2*4px border (negligible) minus 0 (flex handles it)
-        inner.style.height = '100%';
-      });
+      framesEl.innerHTML = '';
+      for (let i = 0; i < pages; i++) {
+        const frame = document.createElement('div');
+        frame.className = 'page-frame';
+        frame.style.top = (i * pageIntervalMm) + 'mm';
+        framesEl.appendChild(frame);
+      }
     }
 
-    window.addEventListener('load', () => setTimeout(fixPageHeight, 150));
+    window.addEventListener('load', () => {
+      Promise.all([
+        document.fonts ? document.fonts.ready : Promise.resolve(),
+        ...Array.from(document.images)
+          .filter(img => !img.complete)
+          .map(img => new Promise(res => { img.onload = img.onerror = res; }))
+      ]).then(() => { buildPageFrames(); setTimeout(buildPageFrames, 300); });
+    });
 
-    // Use ResizeObserver on wrapper content to react to any size changes
-    const wrapper = document.querySelector('.content-wrapper');
-    if (wrapper && typeof ResizeObserver !== 'undefined') {
+    const reportContent = document.querySelector('.report-content');
+    if (reportContent && typeof ResizeObserver !== 'undefined') {
       let roTimer;
-      const ro = new ResizeObserver(() => {
-        clearTimeout(roTimer);
-        roTimer = setTimeout(fixPageHeight, 60);
-      });
-      ro.observe(wrapper);
+      new ResizeObserver(() => { clearTimeout(roTimer); roTimer = setTimeout(buildPageFrames, 80); }).observe(reportContent);
     }
   </script>
 </body>
