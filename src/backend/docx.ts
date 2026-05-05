@@ -217,6 +217,7 @@ export async function buildDocx(
 
   const titleParagraph = new Paragraph({
     alignment: AlignmentType.CENTER,
+    keepNext: true,
     spacing: { before: 360, after: 240 },
     children: [
       new TextRun({
@@ -238,17 +239,18 @@ export async function buildDocx(
   ai.sections.forEach((sec) => {
     if (sec.heading) {
       docChildren.push(
-        new Paragraph({
-          spacing: { before: 240, after: 120 },
-          children: [
-            new TextRun({
-              text: sec.heading,
-              bold: true,
-              size: 28, // 14pt
-              font: "Calibri",
-            }),
-          ],
-        })
+          new Paragraph({
+            keepNext: true,
+            spacing: { before: 240, after: 120 },
+            children: [
+              new TextRun({
+                text: sec.heading,
+                bold: true,
+                size: 28, // 14pt
+                font: "Calibri",
+              }),
+            ],
+          })
       );
     }
     
@@ -372,7 +374,7 @@ export async function buildDocx(
     ],
   });
 
-  docChildren.push(new Paragraph({ spacing: { before: 3600 }, children: [] }));
+  docChildren.push(new Paragraph({ text: "", spacing: { before: 3600 } }));
   docChildren.push(signatureTable);
 
   const doc = new Document({

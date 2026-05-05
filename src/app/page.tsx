@@ -240,9 +240,6 @@ export default function Home() {
         </section>
 
         <section className="lg:sticky lg:top-6 self-start lg:col-span-7">
-          <h2 className="mb-2 text-sm font-medium text-gray-600 uppercase tracking-wide">
-            Live preview
-          </h2>
           <LivePreview 
             payload={payload} 
             onPreviewEdit={(id, field, value) => {
