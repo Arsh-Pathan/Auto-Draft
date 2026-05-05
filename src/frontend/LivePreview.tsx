@@ -45,7 +45,7 @@ export function LivePreview({ payload, onPreviewEdit }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="rounded border border-gray-300 bg-[#e5e7eb] shadow-sm overflow-hidden h-[80vh]">
+      <div className="h-[80vh] w-full">
         <iframe
           ref={iframeRef}
           title="Report preview"
