@@ -374,7 +374,10 @@ export async function buildDocx(
     ],
   });
 
-  docChildren.push(new Paragraph({ text: "", spacing: { before: 3600 } }));
+  // Add several empty paragraphs for signing space so they can gracefully wrap across pages if needed
+  for (let i = 0; i < 5; i++) {
+    docChildren.push(new Paragraph({ text: "" }));
+  }
   docChildren.push(signatureTable);
 
   const doc = new Document({
