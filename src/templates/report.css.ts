@@ -3,26 +3,47 @@ export const REPORT_CSS = `
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
-    padding: 10px;
-    background: #ffffff;
+    padding: 0;
     color: #000;
     font-family: 'Calibri', sans-serif;
     font-size: 12pt;
     line-height: 1.5;
   }
-  .report {
-    padding: 0;
-    max-width: 210mm;
-    margin: 0 auto;
-    background: #ffffff;
+  
+  @media screen {
+    html, body {
+      background: #e5e7eb;
+      padding: 20px 0;
+    }
+    .report {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      padding: 10mm; /* Space outside the double border, representing page margin */
+    }
   }
+
+  @media print {
+    html, body {
+      background: #ffffff;
+    }
+    .report {
+      width: 100%;
+      padding: 0;
+    }
+  }
+
   .report-outer-border {
     border: 2px solid #000;
     padding: 4px;
+    min-height: 277mm; /* Ensure borders stretch near bottom of A4 */
   }
   .report-inner-border {
     border: 1px solid #000;
     padding: 12mm 14mm;
+    min-height: 275mm;
   }
   
   .masthead {

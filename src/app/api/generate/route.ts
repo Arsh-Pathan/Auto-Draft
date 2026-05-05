@@ -14,6 +14,7 @@ export async function POST(req: Request) {
       participants: String(body.participants || ""),
       highlights: String(body.highlights || ""),
       rawDescription: String(body.rawDescription || ""),
+      instructions: String(body.instructions || ""),
     });
     return NextResponse.json({ ok: true, data });
   } catch (err) {

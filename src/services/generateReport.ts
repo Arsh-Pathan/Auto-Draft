@@ -9,6 +9,7 @@ Tone: formal, third person, past tense, no marketing fluff, no emojis, Indian En
 Return ONLY a JSON object matching this schema. No prose, no markdown, no code fences.
 
 {
+  "generatedTitle": "String (Create a professional, formal academic report title for the event if the user provided a weak one or none at all, e.g. 'Meta x PyTorch OpenEnv Hackathon Report')",
   "sections": [
     {
       "id": "unique-string-id",
@@ -27,6 +28,7 @@ Structure the report intelligently. Use tables if appropriate for comparing data
 const REPORT_JSON_SCHEMA = {
   type: "object",
   properties: {
+    generatedTitle: { type: "string" },
     sections: {
       type: "array",
       items: {
@@ -54,17 +56,22 @@ export type GenerateInput = {
   participants: string;
   highlights: string;
   rawDescription: string;
+  instructions: string;
 };
 
 function buildUserMessage(input: GenerateInput): string {
-  return [
+  const base = [
     `EVENT TITLE: ${input.title || "(not provided)"}`,
     `DATE: ${input.date || "(not provided)"}`,
     `VENUE: ${input.venue || "(not provided)"}`,
     `PARTICIPANTS: ${input.participants || "(not provided)"}`,
     `HIGHLIGHTS (rough notes): ${input.highlights || "(not provided)"}`,
     `RAW DESCRIPTION: ${input.rawDescription || "(not provided)"}`,
-  ].join("\n");
+  ];
+  if (input.instructions) {
+    base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+  }
+  return base.join("\n");
 }
 
 function tryParseJson(raw: string): unknown {

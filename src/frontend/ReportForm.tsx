@@ -75,13 +75,28 @@ export function ReportForm({
           onChange={update("highlights")}
           placeholder="key topics, demos, speakers, anything notable"
         />
-        <TextArea
-          label="Raw description"
-          rows={5}
-          value={form.rawDescription}
-          onChange={update("rawDescription")}
-          placeholder="Describe the event freely. Gemini will reorganise this."
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Raw description</label>
+            <textarea
+              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              rows={4}
+              value={form.rawDescription}
+              onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
+              placeholder="Describe the event freely. Gemini will reorganise this."
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
+            <textarea
+              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              rows={2}
+              value={form.instructions}
+              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+              placeholder="E.g., Make the tone more enthusiastic, or specifically highlight the Q&A session..."
+            />
+          </div>
+        </div>
       </fieldset>
 
       <fieldset className="space-y-4">

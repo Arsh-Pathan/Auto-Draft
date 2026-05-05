@@ -50,32 +50,62 @@ function isoToday(): string {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-const INITIAL_FORM: FormState = {
-  title: "Research Paper Presentation Report",
-  date: "",
-  venue: "",
-  participants: "",
-  highlights: "",
-  rawDescription: "",
-  academicYear: REPORT_DEFAULTS.academicYear,
-  semester: REPORT_DEFAULTS.semester,
-  acaRNo: REPORT_DEFAULTS.acaRNo,
-  revNo: REPORT_DEFAULTS.revNo,
-  advisor: SIGNATORIES.advisor,
-  sdpHead: SIGNATORIES.sdpHead,
-  principal: SIGNATORIES.principal,
-};
-
 export default function Home() {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
-  const [ai, setAi] = useState<ReportData>(EMPTY_AI);
+  const [form, setForm] = useState<FormState>({
+    title: "",
+    date: isoToday(),
+    venue: "",
+    participants: "",
+    highlights: "",
+    rawDescription: "",
+    instructions: "",
+    academicYear: REPORT_DEFAULTS.academicYear,
+    semester: REPORT_DEFAULTS.semester,
+    acaRNo: REPORT_DEFAULTS.acaRNo,
+    revNo: REPORT_DEFAULTS.revNo,
+    advisor: SIGNATORIES.advisor,
+    sdpHead: SIGNATORIES.sdpHead,
+    principal: SIGNATORIES.principal,
+  });
+
+  const [ai, setAi] = useState<ReportData>({
+    sections: [
+      {
+        id: "s1",
+        heading: "Overview:",
+        type: "text",
+        text: "The AI & ML Club organised an event for the students of Dhole Patil College of Engineering. The session aimed to expand awareness of contemporary developments in artificial intelligence and machine learning. Faculty members and student volunteers coordinated the activity, which witnessed enthusiastic participation across multiple departments.",
+      },
+      {
+        id: "s2",
+        heading: "Program Details:",
+        type: "text",
+        text: "The programme commenced with a brief introduction by the club coordinator, followed by structured sessions covering the planned agenda. Participants engaged with the content through demonstrations, discussions, and short interactive segments. The flow allowed each contributor to present their part while leaving room for audience questions at the end of every segment.",
+      },
+      {
+        id: "s3",
+        heading: "",
+        type: "bullets",
+        bullets: [
+          "Introduction by the club coordinator",
+          "Technical session on the announced topic",
+          "Live demonstration and walkthrough",
+          "Q&A and audience interaction",
+          "Vote of thanks and closing remarks",
+        ],
+      },
+      {
+        id: "s4",
+        heading: "Overall Outcome:",
+        type: "text",
+        text: "The event provided participants with practical exposure to current AI/ML practice and strengthened their conceptual foundations. Students reported greater clarity on the subject and expressed interest in follow-up activities. The programme reinforced the club's role in fostering peer learning and academic engagement on campus.",
+      }
+    ]
+  });
+  
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [busy, setBusy] = useState({ generating: false, pdf: false, docx: false });
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!form.date) setForm((f) => ({ ...f, date: isoToday() }));
-  }, [form.date]);
 
   const payload: ReportPayload = useMemo(
     () => ({
@@ -115,11 +145,16 @@ export default function Home() {
           participants: form.participants,
           highlights: form.highlights,
           rawDescription: form.rawDescription,
+          instructions: form.instructions,
         }),
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Generation failed");
-      setAi(json.data as ReportData);
+      const generatedAi = json.data as ReportData;
+      setAi(generatedAi);
+      if (generatedAi.generatedTitle) {
+        setForm(f => ({ ...f, title: generatedAi.generatedTitle! }));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
@@ -208,7 +243,26 @@ export default function Home() {
           <h2 className="mb-2 text-sm font-medium text-gray-600 uppercase tracking-wide">
             Live preview
           </h2>
-          <LivePreview payload={payload} />
+          <LivePreview 
+            payload={payload} 
+            onPreviewEdit={(id, field, value) => {
+              setAi(prev => ({
+                ...prev,
+                sections: prev.sections.map(sec => {
+                  if (sec.id === id) {
+                    if (field === 'text' || field === 'heading') {
+                      return { ...sec, [field]: value };
+                    } else if (field === 'bullets') {
+                      return { ...sec, bullets: value };
+                    } else if (field === 'table') {
+                      return { ...sec, table: value };
+                    }
+                  }
+                  return sec;
+                })
+              }));
+            }}
+          />
         </section>
       </div>
 

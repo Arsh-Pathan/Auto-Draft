@@ -8,9 +8,9 @@ export const REPORT_DEFAULTS = {
 };
 
 export const SIGNATORIES = {
-  advisor: "Club Advisor",
-  sdpHead: "SDP Head",
-  principal: "Principal",
+  advisor: "Prof. Yugashree Pawar",
+  sdpHead: "Dr. Vishvas Kalunge",
+  principal: "Dr. Abhijit Dandavate",
 };
 
 export const CLUB_NAME = "AI & ML Club";

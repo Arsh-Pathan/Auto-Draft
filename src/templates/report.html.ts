@@ -54,11 +54,11 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
   const sectionsHtml = ai.sections.map(sec => {
     let content = "";
     if (sec.type === "text") {
-      content = `<p>${escapeHtml(sec.text || "")}</p>`;
+      content = `<p data-sec-id="${sec.id}" data-sec-field="text" contenteditable="true" style="outline:none;">${escapeHtml(sec.text || "")}</p>`;
     } else if (sec.type === "bullets") {
-      content = `<ul class="bullets">${(sec.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`;
+      content = `<ul class="bullets" data-sec-id="${sec.id}" data-sec-field="bullets" contenteditable="true" style="outline:none;">${(sec.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`;
     } else if (sec.type === "table") {
-      content = `<table class="content-table"><tbody>${(sec.table || []).map(row => 
+      content = `<table class="content-table" data-sec-id="${sec.id}" data-sec-field="table" contenteditable="true" style="outline:none;"><tbody>${(sec.table || []).map(row => 
         `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
       ).join("")}</tbody></table>`;
     } else if (sec.type === "image") {
@@ -73,7 +73,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 
     return `
       <section>
-        ${sec.heading ? `<h2 class="section">${escapeHtml(sec.heading)}</h2>` : ""}
+        ${sec.heading ? `<h2 class="section" data-sec-id="${sec.id}" data-sec-field="heading" contenteditable="true" style="outline:none;">${escapeHtml(sec.heading)}</h2>` : ""}
         ${content}
       </section>
     `;
@@ -91,15 +91,19 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
   <main class="report">
     <div class="report-outer-border">
       <div class="report-inner-border">
-        <header class="masthead">
-          <img class="masthead-logo" src="example/dpes_new_logo.svg" alt="DPES Logo" />
-          <div class="masthead-text-col">
-            <div class="masthead-title">DHOLE PATIL COLLEGE OF ENGINEERING</div>
-            <div class="masthead-subtitle">Accredited with Grade A+ by NAAC</div>
-            <div class="masthead-subtitle">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
-            <div class="masthead-subtitle">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
-          </div>
-        </header>
+        <table class="masthead-table" style="width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 15pt; margin-bottom: 25pt;">
+          <tr>
+            <td style="width: 25%; vertical-align: top; text-align: left; padding-left: 10pt;">
+              <img src="/logo.png" alt="DPES Logo" style="width: 120px; height: auto;" />
+            </td>
+            <td style="width: 75%; vertical-align: top; text-align: left; padding-top: 15pt; padding-left: 60pt;">
+              <div style="font-size: 15pt; font-weight: bold; line-height: 1.1; margin-bottom: 6pt; font-family: 'Calibri', sans-serif;">DHOLE PATIL COLLEGE OF ENGINEERING</div>
+              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">Accredited with Grade A+ by NAAC</div>
+              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,</div>
+              <div style="font-size: 7.5pt; font-weight: bold; line-height: 1.3; font-family: 'Calibri', sans-serif;">D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.</div>
+            </td>
+          </tr>
+        </table>
 
         <section class="report-shell">
           <table class="header-table">
@@ -125,7 +129,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 
           ${sectionsHtml}
 
-          <section class="signatures" style="margin-top: 60pt;">
+          <section class="signatures" style="margin-top: 100pt; page-break-inside: avoid;">
             <div class="sig-col">
               <strong>Club Advisor</strong><br/>
               ${escapeHtml(signatories.advisor)}
@@ -143,6 +147,29 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
       </div>
     </div>
   </main>
+  <script>
+    let timeout;
+    document.addEventListener('input', (e) => {
+      const target = e.target.closest('[data-sec-id]');
+      if (!target) return;
+      const id = target.getAttribute('data-sec-id');
+      const field = target.getAttribute('data-sec-field');
+      
+      let value = target.innerText;
+      if (field === 'bullets') {
+        value = Array.from(target.querySelectorAll('li')).map(li => li.innerText);
+      } else if (field === 'table') {
+        value = Array.from(target.querySelectorAll('tr')).map(tr => 
+          Array.from(tr.querySelectorAll('td')).map(td => td.innerText)
+        );
+      }
+      
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        window.parent.postMessage({ type: 'PREVIEW_EDIT', id, field, value }, '*');
+      }, 500);
+    });
+  </script>
 </body>
 </html>`;
 }

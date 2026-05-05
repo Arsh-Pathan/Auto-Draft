@@ -13,6 +13,7 @@ export const ReportSectionSchema = z.object({
 export type ReportSection = z.infer<typeof ReportSectionSchema>;
 
 export const ReportDataSchema = z.object({
+  generatedTitle: z.string().optional(),
   sections: z.array(ReportSectionSchema),
 });
 
@@ -57,6 +58,7 @@ export type FormState = {
   participants: string;
   highlights: string;
   rawDescription: string;
+  instructions: string;
   academicYear: string;
   semester: string;
   acaRNo: string;

@@ -99,9 +99,9 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
   try {
     const logoPng = await readFile(join(process.cwd(), "public", "logo.png"));
     
-    const noBorder = {
+    const headerBorder = {
       top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      bottom: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
       left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
       right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
       insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -110,20 +110,22 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
 
     const headerLayoutTable = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: noBorder,
+      borders: headerBorder,
+      margins: { bottom: 200 },
       rows: [
         new TableRow({
           children: [
             new TableCell({
               width: { size: 25, type: WidthType.PERCENTAGE },
               verticalAlign: VerticalAlign.CENTER,
+              margins: { left: 100, bottom: 200 },
               children: [
                 new Paragraph({
-                  alignment: AlignmentType.CENTER,
+                  alignment: AlignmentType.LEFT,
                   children: [
                     new ImageRun({
                       data: logoPng,
-                      transformation: { width: 140, height: 140 },
+                      transformation: { width: 110, height: 95 },
                       type: "png",
                     }),
                   ],
@@ -133,26 +135,27 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
             new TableCell({
               width: { size: 75, type: WidthType.PERCENTAGE },
               verticalAlign: VerticalAlign.CENTER,
+              margins: { bottom: 200, left: 1200 },
               children: [
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
-                  spacing: { after: 60 },
-                  children: [new TextRun({ text: "DHOLE PATIL COLLEGE OF ENGINEERING", bold: true, size: 30, font: "Calibri" })],
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.LEFT,
                   spacing: { after: 40 },
-                  children: [new TextRun({ text: "Accredited with Grade A+ by NAAC", bold: true, size: 16, font: "Calibri" })],
+                  children: [new TextRun({ text: "DHOLE PATIL COLLEGE OF ENGINEERING", bold: true, size: 28, font: "Calibri" })],
                 }),
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
-                  spacing: { after: 40 },
-                  children: [new TextRun({ text: "ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,", bold: true, size: 16, font: "Calibri" })],
+                  spacing: { after: 20 },
+                  children: [new TextRun({ text: "Accredited with Grade A+ by NAAC", bold: true, size: 15, font: "Calibri" })],
                 }),
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
-                  spacing: { after: 120 },
-                  children: [new TextRun({ text: "D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.", bold: true, size: 16, font: "Calibri" })],
+                  spacing: { after: 20 },
+                  children: [new TextRun({ text: "ISO 9001:2015 Certified Institute, Approved by A.I.C.T.E New Delhi,", bold: true, size: 15, font: "Calibri" })],
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.LEFT,
+                  spacing: { after: 20 },
+                  children: [new TextRun({ text: "D.T.E. Govt of Maharashtra and Affiliated to Savitribai Phule Pune University, Pune.", bold: true, size: 15, font: "Calibri" })],
                 }),
               ],
             }),
@@ -163,36 +166,13 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
 
     return [
       headerLayoutTable,
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 120, after: 180 },
-        children: [
-          new TextRun({
-            text: `${CLUB_NAME} Activity Report`,
-            bold: true,
-            font: "Calibri",
-            size: 21,
-          }),
-        ],
-      }),
+      new Paragraph({ spacing: { after: 200 }, children: [] })
     ];
   } catch (err) {
-    return [
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 180 },
-        children: [
-          new TextRun({
-            text: `${CLUB_NAME} Activity Report`,
-            bold: true,
-            font: "Calibri",
-            size: 24,
-          }),
-        ],
-      }),
-    ];
+    return [];
   }
 }
+
 
 export async function buildDocx(
   payload: ReportPayload,
@@ -348,6 +328,7 @@ export async function buildDocx(
     },
     rows: [
       new TableRow({
+        cantSplit: true,
         children: [
           { role: "Club Advisor", name: signatories.advisor },
           { role: "SDP Head", name: signatories.sdpHead },
@@ -365,7 +346,6 @@ export async function buildDocx(
               children: [
                 new Paragraph({
                   alignment: AlignmentType.CENTER,
-                  spacing: { after: 60 },
                   children: [
                     new TextRun({
                       text: sig.role,
@@ -392,7 +372,7 @@ export async function buildDocx(
     ],
   });
 
-  docChildren.push(new Paragraph({ spacing: { before: 720 }, children: [] }));
+  docChildren.push(new Paragraph({ spacing: { before: 1200 }, children: [] }));
   docChildren.push(signatureTable);
 
   const doc = new Document({
@@ -416,10 +396,10 @@ export async function buildDocx(
                 display: "allPages",
                 offsetFrom: "page",
               },
-              pageBorderTop: { style: BorderStyle.DOUBLE, size: 24, color: "000000", space: 24 },
-              pageBorderBottom: { style: BorderStyle.DOUBLE, size: 24, color: "000000", space: 24 },
-              pageBorderLeft: { style: BorderStyle.DOUBLE, size: 24, color: "000000", space: 24 },
-              pageBorderRight: { style: BorderStyle.DOUBLE, size: 24, color: "000000", space: 24 },
+              pageBorderTop: { style: BorderStyle.DOUBLE, size: 8, color: "000000", space: 16 },
+              pageBorderBottom: { style: BorderStyle.DOUBLE, size: 8, color: "000000", space: 16 },
+              pageBorderLeft: { style: BorderStyle.DOUBLE, size: 8, color: "000000", space: 16 },
+              pageBorderRight: { style: BorderStyle.DOUBLE, size: 8, color: "000000", space: 16 },
             },
           },
         },
