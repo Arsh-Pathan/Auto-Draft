@@ -129,7 +129,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 
           ${sectionsHtml}
 
-          <section class="signatures" style="margin-top: 100pt; page-break-inside: avoid;">
+          <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid;">
             <div class="sig-col">
               <strong>Club Advisor</strong><br/>
               ${escapeHtml(signatories.advisor)}

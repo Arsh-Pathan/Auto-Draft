@@ -372,7 +372,7 @@ export async function buildDocx(
     ],
   });
 
-  docChildren.push(new Paragraph({ spacing: { before: 1200 }, children: [] }));
+  docChildren.push(new Paragraph({ spacing: { before: 3600 }, children: [] }));
   docChildren.push(signatureTable);
 
   const doc = new Document({
