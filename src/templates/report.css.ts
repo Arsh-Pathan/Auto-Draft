@@ -45,7 +45,7 @@ export const REPORT_CSS = `
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       border: 2px solid #000;
-      z-index: -2;
+      z-index: 9998;
       pointer-events: none;
     }
     .report::after {
@@ -53,7 +53,7 @@ export const REPORT_CSS = `
       position: fixed;
       top: 4px; left: 4px; right: 4px; bottom: 4px;
       border: 1px solid #000;
-      z-index: -1;
+      z-index: 9999;
       pointer-events: none;
     }
   }
