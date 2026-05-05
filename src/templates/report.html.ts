@@ -175,38 +175,56 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
     // Automatically stretch the borders to complete the simulated A4 page
     function fixPageHeight() {
       const report = document.querySelector('.report');
+      const outer = document.querySelector('.report-outer-border');
+      const inner = document.querySelector('.report-inner-border');
       const wrapper = document.querySelector('.content-wrapper');
-      if (!report || !wrapper) return;
+      if (!report || !outer || !inner || !wrapper) return;
 
-      // 1mm ~ 3.7795px
+      // 1mm ~ 3.7795px at 96dpi
       const pxPerMm = 3.779527559;
-      // We simulate pages as 297mm + 13mm gap = 310mm intervals
-      const totalPageHeightPx = 310 * pxPerMm; 
 
-      // Measure wrapper content height
-      const contentHeight = wrapper.getBoundingClientRect().height;
-      // Also account for the padding inside report, outer, and inner borders (10mm + 4px + 12mm ~ 23mm top and bottom = 46mm)
-      const paddingPx = 46 * pxPerMm;
-      const totalNeededHeight = contentHeight + paddingPx;
+      // Temporarily reset to measure natural wrapper height
+      report.style.height = 'auto';
+      report.style.minHeight = '297mm';
+      outer.style.height = 'auto';
+      inner.style.height = 'auto';
 
-      const pages = Math.max(1, Math.ceil(totalNeededHeight / totalPageHeightPx));
-      const requiredMm = (pages * 310) - 13;
-      
-      report.style.minHeight = requiredMm + 'mm';
+      // Force layout recalculation then measure
+      requestAnimationFrame(() => {
+        const contentHeight = wrapper.getBoundingClientRect().height;
+        // Add padding: .report (10mm*2) + .outer (4px*2) + .inner (12mm*2) ≈ 24mm + 8px ≈ 48mm
+        const paddingPx = 48 * pxPerMm;
+        const totalNeeded = contentHeight + paddingPx;
+
+        // Pages of 297mm each, with 13mm simulated gap between = 310mm intervals
+        const pageIntervalPx = 310 * pxPerMm;
+        const pages = Math.max(1, Math.ceil(totalNeeded / pageIntervalPx));
+        const requiredMm = (pages * 310) - 13;
+
+        // Set fixed height so flex children (outer, inner) stretch to fill
+        report.style.height = requiredMm + 'mm';
+        report.style.minHeight = requiredMm + 'mm';
+
+        // Explicitly fill outer border: report height minus 2*10mm padding
+        const outerH = requiredMm - 20;
+        outer.style.height = outerH + 'mm';
+
+        // Inner border: outer height minus 2*4px border (negligible) minus 0 (flex handles it)
+        inner.style.height = '100%';
+      });
     }
 
-    window.addEventListener('load', () => {
-      // Small delay to ensure layout is done
-      setTimeout(fixPageHeight, 100);
-    });
+    window.addEventListener('load', () => setTimeout(fixPageHeight, 150));
 
-    // Observe resizing of the content wrapper itself (handles font loads, image loads, edits)
+    // Use ResizeObserver on wrapper content to react to any size changes
     const wrapper = document.querySelector('.content-wrapper');
-    if (wrapper) {
-      const resizeObserver = new ResizeObserver(() => {
-        fixPageHeight();
+    if (wrapper && typeof ResizeObserver !== 'undefined') {
+      let roTimer;
+      const ro = new ResizeObserver(() => {
+        clearTimeout(roTimer);
+        roTimer = setTimeout(fixPageHeight, 60);
       });
-      resizeObserver.observe(wrapper);
+      ro.observe(wrapper);
     }
   </script>
 </body>
