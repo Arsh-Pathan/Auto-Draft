@@ -17,6 +17,8 @@ type Props = {
   onDownloadDocx: () => void;
   busy: { generating: boolean; pdf: boolean; docx: boolean };
   error: string | null;
+  apiKey: string;
+  setApiKey: (key: string) => void;
 };
 
 export function ReportForm({
@@ -31,11 +33,16 @@ export function ReportForm({
   onDownloadDocx,
   busy,
   error,
+  apiKey,
+  setApiKey,
 }: Props) {
   const update =
     <K extends keyof FormState>(key: K) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm({ ...form, [key]: e.target.value });
+
+  const isQuotaError = error?.includes("QUOTA_EXCEEDED");
+  const displayError = isQuotaError ? "The server's Google Gemini API quota has been exceeded or the key is missing." : error;
 
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
@@ -130,6 +137,30 @@ export function ReportForm({
         />
       </fieldset>
 
+      {isQuotaError && (
+        <div className="rounded border border-amber-200 bg-amber-50 p-4 space-y-3">
+          <h3 className="text-sm font-bold text-amber-800">API Limit Reached</h3>
+          <p className="text-sm text-amber-700">
+            The server's Gemini API key has run out of quota. To continue using AutoReport, please provide your own free Gemini API key.
+          </p>
+          <ol className="list-decimal list-inside text-sm text-amber-700 space-y-1">
+            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline font-semibold hover:text-amber-900">Google AI Studio</a>.</li>
+            <li>Sign in and click <strong>Create API key</strong>.</li>
+            <li>Paste your new key below and click Generate again.</li>
+          </ol>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-amber-900">Your Gemini API Key (Not Saved to Server)</label>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="w-full rounded border px-3 py-2 text-sm border-amber-300 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              placeholder="AIzaSy..."
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={onGenerate} disabled={busy.generating}>
           {busy.generating ? "Generating..." : "Generate with Gemini"}
@@ -152,9 +183,9 @@ export function ReportForm({
         </Button>
       </div>
 
-      {error && (
+      {error && !isQuotaError && (
         <p className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
+          {displayError}
         </p>
       )}
 

@@ -106,6 +106,7 @@ export default function Home() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [busy, setBusy] = useState({ generating: false, pdf: false, docx: false });
   const [error, setError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState("");
 
   const payload: ReportPayload = useMemo(
     () => ({
@@ -146,10 +147,16 @@ export default function Home() {
           highlights: form.highlights,
           rawDescription: form.rawDescription,
           instructions: form.instructions,
+          apiKey: apiKey || undefined,
         }),
       });
       const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error || "Generation failed");
+      if (!res.ok || !json.ok) {
+        if (res.status === 429 || json.error?.includes("quota") || json.error?.includes("API_KEY is not set")) {
+          throw new Error("QUOTA_EXCEEDED: " + (json.error || "API Quota Exceeded"));
+        }
+        throw new Error(json.error || "Generation failed");
+      }
       const generatedAi = json.data as ReportData;
       setAi(generatedAi);
       if (generatedAi.generatedTitle) {
@@ -236,6 +243,8 @@ export default function Home() {
             onDownloadDocx={() => downloadFromForm("/api/docx", "docx", "docx")}
             busy={busy}
             error={error}
+            apiKey={apiKey}
+            setApiKey={setApiKey}
           />
         </section>
 

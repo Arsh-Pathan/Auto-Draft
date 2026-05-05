@@ -1,7 +1,7 @@
 import "server-only";
 
 const GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.0-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -27,12 +27,13 @@ type GeminiResponse = {
 
 export async function callGemini(
   messages: ChatMessage[],
-  responseJsonSchema?: GeminiSchema
+  responseJsonSchema?: GeminiSchema,
+  userApiKey?: string
 ): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "GEMINI_API_KEY is not set. Copy .env.local.example to .env.local and fill it in."
+      "GEMINI_API_KEY is not set. Please provide your own API key to continue."
     );
   }
 

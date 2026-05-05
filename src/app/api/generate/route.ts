@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       highlights: String(body.highlights || ""),
       rawDescription: String(body.rawDescription || ""),
       instructions: String(body.instructions || ""),
-    });
+    }, body.apiKey ? String(body.apiKey) : undefined);
     return NextResponse.json({ ok: true, data });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

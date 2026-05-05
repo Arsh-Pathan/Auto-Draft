@@ -79,13 +79,13 @@ function tryParseJson(raw: string): unknown {
   return JSON.parse(trimmed);
 }
 
-export async function generateReport(input: GenerateInput): Promise<ReportData> {
+export async function generateReport(input: GenerateInput, userApiKey?: string): Promise<ReportData> {
   const messages: ChatMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: buildUserMessage(input) },
   ];
 
-  let raw = await callGemini(messages, REPORT_JSON_SCHEMA);
+  let raw = await callGemini(messages, REPORT_JSON_SCHEMA, userApiKey);
   let parsed: unknown;
   try {
     parsed = tryParseJson(raw);
