@@ -136,10 +136,10 @@ export default function Home() {
     setError(null);
     setBusy((b) => ({ ...b, generating: true }));
     try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const fd = new FormData();
+      fd.append(
+        "meta",
+        JSON.stringify({
           title: form.title,
           date: form.date,
           venue: form.venue,
@@ -148,8 +148,12 @@ export default function Home() {
           rawDescription: form.rawDescription,
           instructions: form.instructions,
           apiKey: apiKey || undefined,
-        }),
-      });
+          photoCaptions: photos.map((p) => p.caption),
+        })
+      );
+      photos.forEach((p) => fd.append("photos", p.file, p.file.name));
+
+      const res = await fetch("/api/generate", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok || !json.ok) {
         if (res.status === 429 || json.error?.includes("quota") || json.error?.includes("API_KEY is not set")) {
@@ -160,7 +164,19 @@ export default function Home() {
       const generatedAi = json.data as ReportData;
       setAi(generatedAi);
       if (generatedAi.generatedTitle) {
-        setForm(f => ({ ...f, title: generatedAi.generatedTitle! }));
+        setForm({ ...form, title: generatedAi.generatedTitle });
+      }
+      const captions = (json.captions || {}) as Record<string, string>;
+      if (Object.keys(captions).length > 0) {
+        setPhotos(
+          photos.map((p, i) => {
+            const ai = captions[String(i)];
+            if (ai && p.caption.trim() === "") {
+              return { ...p, caption: ai };
+            }
+            return p;
+          })
+        );
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");

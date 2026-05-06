@@ -3,9 +3,15 @@ import "server-only";
 const GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemini-2.5-flash";
 
+export type ChatImage = {
+  mime: string;
+  base64: string;
+};
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
+  images?: ChatImage[];
 };
 
 type GeminiSchema = Record<string, unknown>;
@@ -41,10 +47,21 @@ export async function callGemini(
   const systemInstruction = messages.find((message) => message.role === "system")?.content;
   const contents = messages
     .filter((message) => message.role !== "system")
-    .map((message) => ({
-      role: message.role === "assistant" ? "model" : "user",
-      parts: [{ text: message.content }],
-    }));
+    .map((message) => {
+      const parts: Array<
+        | { text: string }
+        | { inlineData: { mimeType: string; data: string } }
+      > = [{ text: message.content }];
+      if (message.images?.length) {
+        for (const img of message.images) {
+          parts.push({ inlineData: { mimeType: img.mime, data: img.base64 } });
+        }
+      }
+      return {
+        role: message.role === "assistant" ? "model" : "user",
+        parts,
+      };
+    });
 
   const res = await fetch(
     `${GEMINI_API_ROOT}/${encodeURIComponent(model)}:generateContent`,

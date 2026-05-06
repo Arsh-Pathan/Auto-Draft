@@ -8,6 +8,7 @@ export const ReportSectionSchema = z.object({
   bullets: z.array(z.string()).optional(),
   table: z.array(z.array(z.string())).optional(),
   imageIndex: z.number().optional(),
+  imageCaption: z.string().optional(),
 });
 
 export type ReportSection = z.infer<typeof ReportSectionSchema>;
