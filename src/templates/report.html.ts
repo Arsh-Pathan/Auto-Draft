@@ -90,7 +90,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 <body>
   <main class="report">
     <div class="report-content">
-      <table class="masthead-table" style="width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 15pt; margin-bottom: 25pt;">
+      <table class="masthead-table" style="width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 15pt; margin-bottom: 25pt; table-layout: fixed;">
         <tr>
           <td style="width: 25%; vertical-align: top; text-align: left; padding-left: 10pt;">
             <img src="/logo.png" alt="DPES Logo" style="width: 120px; height: auto;" />
@@ -128,16 +128,16 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 
         ${sectionsHtml}
 
-        <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid;">
-          <div class="sig-col">
+        <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
+          <div class="sig-col" style="display: table-cell; width: 33.33%;">
             <strong>Club Advisor</strong><br/>
             ${escapeHtml(signatories.advisor)}
           </div>
-          <div class="sig-col">
+          <div class="sig-col" style="display: table-cell; width: 33.33%;">
             <strong>SDP Head</strong><br/>
             ${escapeHtml(signatories.sdpHead)}
           </div>
-          <div class="sig-col">
+          <div class="sig-col" style="display: table-cell; width: 33.33%;">
             <strong>Principal</strong><br/>
             ${escapeHtml(signatories.principal)}
           </div>

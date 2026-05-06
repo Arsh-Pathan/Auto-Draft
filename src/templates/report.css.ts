@@ -44,7 +44,10 @@ export const REPORT_CSS = `
   @media print {
     html, body { background: #fff; margin: 0; padding: 0; }
     .report { background: #fff; }
-    .report-content { padding: 0; }
+    /* In print, we need padding so content doesn't hit the border */
+    .report-content { 
+      padding: 12mm 14mm; 
+    }
     body::before {
       content: "";
       position: fixed;
@@ -56,7 +59,7 @@ export const REPORT_CSS = `
     body::after {
       content: "";
       position: fixed;
-      top: 5px; left: 5px; right: 5px; bottom: 5px;
+      top: 4px; left: 4px; right: 4px; bottom: 4px;
       border: 1px solid #000;
       z-index: 9999;
       pointer-events: none;
@@ -171,7 +174,18 @@ export const REPORT_CSS = `
   .sig-col {
     width: 32%;
     text-align: center;
-    font-size: 12pt;
-    line-height: 1.5;
+    font-size: 11pt;
+    line-height: 1.3;
+  }
+  
+  /* Ensure no content can push out the page width */
+  .report-content > * {
+    max-width: 100% !important;
+  }
+  
+  /* Force tables to respect the padding */
+  table {
+    table-layout: fixed;
+    width: 100%;
   }
 `;
