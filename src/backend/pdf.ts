@@ -1,5 +1,9 @@
 import "server-only";
 import puppeteer, { type Browser } from "puppeteer";
+import libre from "libreoffice-convert";
+import { promisify } from "node:util";
+
+const convert = promisify(libre.convert);
 
 type GlobalWithBrowser = typeof globalThis & { __autoReportBrowser?: Browser };
 const g = globalThis as GlobalWithBrowser;
@@ -30,6 +34,16 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
     return Buffer.from(pdf);
   } finally {
     await page.close();
+  }
+}
+
+export async function docxToPdf(docxBuffer: Buffer): Promise<Buffer> {
+  try {
+    const pdfBuffer = await convert(docxBuffer, ".pdf", undefined);
+    return pdfBuffer as Buffer;
+  } catch (err) {
+    console.error("DOCX to PDF conversion failed:", err);
+    throw new Error("Failed to convert DOCX to PDF. Ensure LibreOffice is installed.");
   }
 }
 
