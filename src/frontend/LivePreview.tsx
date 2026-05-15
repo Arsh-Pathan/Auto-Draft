@@ -5,7 +5,7 @@ import type { ReportPayload } from "@/types/report";
 
 type Props = { 
   payload: ReportPayload;
-  onPreviewEdit?: (id: string, field: string, value: any) => void;
+  onPreviewEdit?: (id: string, field: string, value: string | string[] | string[][]) => void;
 };
 
 export function LivePreview({ payload, onPreviewEdit }: Props) {

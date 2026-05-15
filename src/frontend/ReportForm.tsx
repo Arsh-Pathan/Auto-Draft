@@ -141,7 +141,7 @@ export function ReportForm({
         <div className="rounded border border-amber-200 bg-amber-50 p-4 space-y-3">
           <h3 className="text-sm font-bold text-amber-800">API Limit Reached</h3>
           <p className="text-sm text-amber-700">
-            The server's Gemini API key has run out of quota. To continue using AutoReport, please provide your own free Gemini API key.
+            The server&apos;s Gemini API key has run out of quota. To continue using AutoReport, please provide your own free Gemini API key.
           </p>
           <ol className="list-decimal list-inside text-sm text-amber-700 space-y-1">
             <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline font-semibold hover:text-amber-900">Google AI Studio</a>.</li>
@@ -194,7 +194,7 @@ export function ReportForm({
           AI output (edit before download)
         </legend>
         
-        {ai.sections.map((sec, i) => (
+        {ai.sections.map((sec) => (
           <div key={sec.id} className="p-3 border border-gray-200 rounded-md bg-gray-50 flex flex-col gap-3 relative">
             <button 
               type="button" 

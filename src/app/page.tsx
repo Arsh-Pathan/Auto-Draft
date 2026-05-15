@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ReportForm } from "@/frontend/ReportForm";
 import { LivePreview } from "@/frontend/LivePreview";
@@ -8,40 +8,7 @@ import type { FormState, ReportData, ReportPayload } from "@/types/report";
 import { COLLEGE_NAME, REPORT_DEFAULTS, SIGNATORIES } from "@/utils/constants";
 import { reportFilename } from "@/utils/filename";
 
-const EMPTY_AI: ReportData = {
-  sections: [
-    {
-      id: "s1",
-      heading: "Overview:",
-      type: "text",
-      text: "The AI & ML Club organised an event for the students of Dhole Patil College of Engineering. The session aimed to expand awareness of contemporary developments in artificial intelligence and machine learning. Faculty members and student volunteers coordinated the activity, which witnessed enthusiastic participation across multiple departments.",
-    },
-    {
-      id: "s2",
-      heading: "Program Details:",
-      type: "text",
-      text: "The programme commenced with a brief introduction by the club coordinator, followed by structured sessions covering the planned agenda. Participants engaged with the content through demonstrations, discussions, and short interactive segments. The flow allowed each contributor to present their part while leaving room for audience questions at the end of every segment.",
-    },
-    {
-      id: "s3",
-      heading: "",
-      type: "bullets",
-      bullets: [
-        "Introduction by the club coordinator",
-        "Technical session on the announced topic",
-        "Live demonstration and walkthrough",
-        "Q&A and audience interaction",
-        "Vote of thanks and closing remarks",
-      ],
-    },
-    {
-      id: "s4",
-      heading: "Overall Outcome:",
-      type: "text",
-      text: "The event provided participants with practical exposure to current AI/ML practice and strengthened their conceptual foundations. Students reported greater clarity on the subject and expressed interest in follow-up activities. The programme reinforced the club's role in fostering peer learning and academic engagement on campus.",
-    }
-  ]
-};
+
 
 function isoToday(): string {
   const d = new Date();
@@ -273,11 +240,11 @@ export default function Home() {
                 sections: prev.sections.map(sec => {
                   if (sec.id === id) {
                     if (field === 'text' || field === 'heading') {
-                      return { ...sec, [field]: value };
+                      return { ...sec, [field]: value as string };
                     } else if (field === 'bullets') {
-                      return { ...sec, bullets: value };
+                      return { ...sec, bullets: value as string[] };
                     } else if (field === 'table') {
-                      return { ...sec, table: value };
+                      return { ...sec, table: value as string[][] };
                     }
                   }
                   return sec;

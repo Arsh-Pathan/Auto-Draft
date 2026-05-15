@@ -1,7 +1,7 @@
 import type { ReportPayload } from "@/types/report";
 import { REPORT_CSS } from "./report.css";
 import { formatDateShort } from "@/utils/formatDate";
-import { CLUB_NAME } from "@/utils/constants";
+
 
 function escapeHtml(s: string): string {
   return s
@@ -30,26 +30,7 @@ function normalizeAssetBaseUrl(assetBaseUrl?: string): string {
 export function renderReportHtml(payload: ReportPayload, options: RenderOptions = {}): string {
   const { meta, ai, photographs, signatories } = payload;
   const assetBaseUrl = normalizeAssetBaseUrl(options.assetBaseUrl);
-  const headerTable = `
-    <table class="header" style="width: 100%; border-collapse: collapse; margin-bottom: 10pt;">
-      <tbody>
-        <tr>
-          <td style="width: 25%;"><strong>ACA/R / 56</strong></td>
-          <td rowspan="2" style="width: 50%; text-align: center; vertical-align: middle;"><strong>Dhole Patil College of Engineering</strong></td>
-          <td style="width: 25%;"><strong>AcademicYear:${escapeHtml(meta.academicYear)}</strong></td>
-        </tr>
-        <tr>
-          <td><strong>Rev: 00</strong></td>
-          <td><strong>Semester: ${escapeHtml(meta.semester)}</strong></td>
-        </tr>
-        <tr>
-          <td><strong>Date: 15.12.2016</strong></td>
-          <td style="text-align: center;"><strong>Report</strong></td>
-          <td><strong>Date- ${formatDateShort(meta.date)}</strong></td>
-        </tr>
-      </tbody>
-    </table>
-  `;
+
 
   const sectionsHtml = ai.sections.map(sec => {
     let content = "";

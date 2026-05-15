@@ -22,9 +22,9 @@ import {
 import type { ReportPayload } from "@/types/report";
 import { formatDateShort } from "@/utils/formatDate";
 import { scaleToMaxWidth, type ProcessedImage } from "@/services/imagePipeline";
-import { CLUB_NAME } from "@/utils/constants";
 
-type CellOpts = { bold?: boolean; shaded?: boolean; width?: number };
+
+
 
 const BORDER = {
   style: BorderStyle.SINGLE,
@@ -54,46 +54,7 @@ function headerCell(text: string, opts: { rowSpan?: number; width?: number; alig
   });
 }
 
-function sectionHeading(text: string): Paragraph {
-  return new Paragraph({
-    spacing: { before: 240, after: 120 },
-    children: [
-      new TextRun({
-        text,
-        bold: true,
-        size: 26,
-        font: "Calibri",
-        underline: { type: UnderlineType.SINGLE },
-      }),
-    ],
-  });
-}
 
-function bodyParagraph(text: string): Paragraph {
-  return new Paragraph({
-    alignment: AlignmentType.JUSTIFIED,
-    spacing: { after: 120 },
-    children: [new TextRun({ text, font: "Calibri", size: 24 })],
-  });
-}
-
-function bullet(text: string): Paragraph {
-  return new Paragraph({
-    bullet: { level: 0 },
-    spacing: { after: 80 },
-    children: [new TextRun({ text, font: "Calibri", size: 24 })],
-  });
-}
-
-function captionPara(text: string): Paragraph {
-  return new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { before: 60, after: 200 },
-    children: [
-      new TextRun({ text, italics: true, font: "Calibri", size: 20 }),
-    ],
-  });
-}
 
 async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
   try {
@@ -168,7 +129,7 @@ async function buildHeaderBlock(): Promise<(Paragraph | Table)[]> {
       headerLayoutTable,
       new Paragraph({ spacing: { after: 200 }, children: [] })
     ];
-  } catch (err) {
+  } catch {
     return [];
   }
 }
