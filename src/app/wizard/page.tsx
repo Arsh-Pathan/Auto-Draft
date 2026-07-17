@@ -87,6 +87,14 @@ function WizardContent() {
       return; // Mandated raw description cannot be empty
     }
 
+    if (currentStep.id === "title" && title.trim() === "") {
+      // User clicked "Draft with Gemini" on the Title step.
+      // We set it to auto-extract and proceed to the next step rather than generating the whole document.
+      setTitleChoice("extract");
+      setStep(step + 1);
+      return;
+    }
+
     if (isCurrentFieldEmpty) {
       // Act as skip/generate immediately
       handleSubmit();
@@ -238,45 +246,17 @@ function WizardContent() {
           {/* Form input render - simplified Typeform style */}
           <div className="min-h-[140px] flex flex-col justify-start pt-2">
             {currentStep.id === "title" && (
-              <div className="space-y-4 w-full">
-                <input
-                  type="text"
-                  autoFocus
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                  value={titleChoice === "extract" && docType === "report" ? "" : title}
-                  disabled={titleChoice === "extract" && docType === "report"}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    setTitleChoice("manual");
-                  }}
-                  placeholder={
-                    titleChoice === "extract" && docType === "report"
-                      ? "Gemini will auto-generate..."
-                      : "Type title here..."
-                  }
-                />
-                {docType === "report" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (titleChoice === "extract") {
-                        setTitleChoice("manual");
-                        setTitle("");
-                      } else {
-                        setTitleChoice("extract");
-                        setTitle("");
-                      }
-                    }}
-                    className={`w-full py-3.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all flex items-center justify-center gap-2 ${
-                      titleChoice === "extract"
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-black border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {titleChoice === "extract" ? "✓ Gemini Enabled" : "Draft Title with Gemini"}
-                  </button>
-                )}
-              </div>
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={titleChoice === "extract" ? "" : title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setTitleChoice("manual");
+                }}
+                placeholder="Type title here..."
+              />
             )}
 
             {currentStep.id === "recipient" && (
