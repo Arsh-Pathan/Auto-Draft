@@ -32,6 +32,14 @@ function WizardContent() {
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState("Preparing draft...");
   const [error, setError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState("");
+
+  React.useEffect(() => {
+    const savedKey = localStorage.getItem("auto_draft_api_key");
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
+  }, []);
 
   // Dynamic step definitions: one thing at a time with simple conversational wording
   const steps = useMemo(() => {
@@ -96,8 +104,14 @@ function WizardContent() {
     }
 
     if (isCurrentFieldEmpty) {
-      // Act as skip/generate immediately
-      handleSubmit();
+      // User clicked "Draft with Gemini" to skip/fast-track.
+      // If we are before the rawDescription step, jump directly to it to collect the mandatory raw notes.
+      const rawDescIndex = steps.findIndex((s) => s.id === "rawDescription");
+      if (step - 1 < rawDescIndex) {
+        setStep(rawDescIndex + 1);
+      } else {
+        handleSubmit();
+      }
     } else {
       // Proceed to next step
       if (step < totalSteps) {
@@ -150,6 +164,7 @@ function WizardContent() {
           instructions,
           photoCaptions: photos.map((p) => p.caption),
           docType,
+          apiKey: apiKey || undefined,
           recipient: docType === "application" ? recipient : undefined,
           senderName: docType === "application" ? senderName : undefined,
           senderDesignation: docType === "application" ? senderDesignation : undefined,
@@ -231,11 +246,31 @@ function WizardContent() {
       )}
 
       <div className="w-full max-w-xl relative flex flex-col justify-center">
-        {error && (
+        {error && (error.includes("GEMINI_API_KEY") || error.toLowerCase().includes("quota") || error.includes("API key")) ? (
+          <div className="mb-6 p-6 rounded-xl border border-amber-200 bg-amber-50/50 space-y-4">
+            <h3 className="text-sm font-bold text-amber-900 uppercase tracking-wider">Gemini API Key Required</h3>
+            <p className="text-xs text-amber-700 leading-relaxed">
+              The server&apos;s Gemini API key is missing or has exceeded its limit. Please provide your own free Gemini API key to continue. You can get one from{" "}
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline font-bold text-amber-900 hover:opacity-80">
+                Google AI Studio
+              </a>.
+            </p>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => {
+                setApiKey(e.target.value);
+                localStorage.setItem("auto_draft_api_key", e.target.value);
+              }}
+              className="w-full bg-transparent border-b border-amber-300 py-2 text-sm font-medium focus:border-amber-600 focus:outline-none transition-colors placeholder-amber-400"
+              placeholder="Paste your API key (AIzaSy...) here"
+            />
+          </div>
+        ) : error ? (
           <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 font-medium">
             {error}
           </div>
-        )}
+        ) : null}
 
         <div className="space-y-8">
           <div>

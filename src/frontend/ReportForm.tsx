@@ -41,8 +41,8 @@ export function ReportForm({
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm({ ...form, [key]: e.target.value });
 
-  const isQuotaError = error?.includes("QUOTA_EXCEEDED");
-  const displayError = isQuotaError ? "The server's Google Gemini API quota has been exceeded or the key is missing." : error;
+  const isQuotaError = error?.includes("QUOTA_EXCEEDED") || error?.includes("GEMINI_API_KEY");
+  const displayError = isQuotaError ? "The server's Google Gemini API key is missing or the quota has been exceeded." : error;
 
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>

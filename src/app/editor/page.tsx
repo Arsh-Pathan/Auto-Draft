@@ -87,6 +87,11 @@ function EditorContent() {
     const savedForm = localStorage.getItem("auto_draft_form_state");
     const savedAi = localStorage.getItem("auto_draft_ai_state");
     const savedPhotos = localStorage.getItem("auto_draft_photos");
+    const savedKey = localStorage.getItem("auto_draft_api_key");
+
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
 
     if (savedForm) {
       try {
@@ -319,7 +324,10 @@ function EditorContent() {
             busy={busy}
             error={error}
             apiKey={apiKey}
-            setApiKey={setApiKey}
+            setApiKey={(key) => {
+              setApiKey(key);
+              localStorage.setItem("auto_draft_api_key", key);
+            }}
           />
         </section>
 
