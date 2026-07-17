@@ -33,29 +33,29 @@ function WizardContent() {
   const [loadingStatus, setLoadingStatus] = useState("Preparing draft...");
   const [error, setError] = useState<string | null>(null);
 
-  // Dynamic step definitions: one thing at a time
+  // Dynamic step definitions: one thing at a time with simple conversational wording
   const steps = useMemo(() => {
     if (docType === "report") {
       return [
         { id: "title", label: "What is the title of the event?", description: "Enter the title manually, or let Gemini extract it from your description later." },
-        { id: "date", label: "When was this event held?", description: "Select the date of the event." },
-        { id: "venue", label: "Where was this event hosted?", description: "e.g. Seminar Hall, A-Block, Computer Lab" },
-        { id: "participants", label: "Who participated in the event?", description: "e.g. BE students, department faculty, external speakers" },
-        { id: "highlights", label: "What were the key takeaways / highlights?", description: "List bullet points or rough notes on the main highlights." },
-        { id: "rawDescription", label: "Give a raw description of the event", description: "Mandatory: Describe the event details freely in your own words. AI will formalize this." },
-        { id: "instructions", label: "Any specific formatting instructions?", description: "Optional: e.g. Keep it concise, highlight the key speaker." },
-        { id: "photos", label: "Upload photographs of the event", description: "Optional: Drag and drop event photographs." }
+        { id: "date", label: "When was the event held?", description: "Select the date of the event." },
+        { id: "venue", label: "Where did it take place?", description: "e.g. Seminar Hall, A-Block, Computer Lab" },
+        { id: "participants", label: "Who attended the event?", description: "e.g. BE students, department faculty, guest speakers" },
+        { id: "highlights", label: "What were the key highlights?", description: "List some quick bullet points or takeaways." },
+        { id: "rawDescription", label: "Roughly what happened?", description: "Mandatory: Write in simple words what happened from start to finish." },
+        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it concise, highlight the guest speaker's speech." },
+        { id: "photos", label: "Upload event photos", description: "Optional: Drag and drop event photographs." }
       ];
     } else {
       return [
         { id: "title", label: "What is the subject of the application?", description: "Enter the subject header of your request." },
-        { id: "recipient", label: "Who is this application addressed to?", description: "Enter the designation and address of the authority." },
-        { id: "date", label: "Select the application date", description: "The date listed on the header of the letter." },
-        { id: "senderName", label: "What is your full name?", description: "Enter the sender name." },
-        { id: "senderDesignation", label: "What is your designation / department?", description: "e.g. President, AI & ML Club" },
-        { id: "highlights", label: "What are the main request points?", description: "List bullet points of details or requests." },
-        { id: "rawDescription", label: "Give a description of the request details", description: "Mandatory: Describe the application requirements freely." },
-        { id: "instructions", label: "Any specific instructions for the AI?", description: "Optional: e.g. Keep it formal and polite." }
+        { id: "recipient", label: "Who is receiving this application?", description: "Enter the designation and address of the authority." },
+        { id: "date", label: "What is the date?", description: "Select the application date." },
+        { id: "senderName", label: "What is your name?", description: "Enter your full name." },
+        { id: "senderDesignation", label: "What is your designation or department?", description: "e.g. Student, Department of AI & ML" },
+        { id: "highlights", label: "What are the key points of the request?", description: "List bullet points of details or requests." },
+        { id: "rawDescription", label: "Roughly what is this request about?", description: "Mandatory: Describe why you are making this request and the details." },
+        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it formal and polite." }
       ];
     }
   }, [docType]);
@@ -342,7 +342,7 @@ function WizardContent() {
                 className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
                 value={rawDescription}
                 onChange={(e) => setRawDescription(e.target.value)}
-                placeholder="Describe details here..."
+                placeholder="Type what roughly happened here..."
               />
             )}
 
