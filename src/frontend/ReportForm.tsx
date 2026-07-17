@@ -46,67 +46,139 @@ export function ReportForm({
 
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-      <fieldset className="space-y-4">
-        <legend className="text-base font-semibold text-ink">Event details</legend>
-        <Field
-          label="Event title"
-          value={form.title}
-          onChange={update("title")}
-          placeholder="Research Paper Presentation"
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <Field
-            label="Date"
-            type="date"
-            value={form.date}
-            onChange={update("date")}
-          />
-          <Field
-            label="Venue"
-            value={form.venue}
-            onChange={update("venue")}
-            placeholder="Seminar Hall, A-Block"
-          />
-        </div>
-        <TextArea
-          label="Participants"
-          rows={2}
-          value={form.participants}
-          onChange={update("participants")}
-          placeholder="TE & BE AI/ML students, faculty coordinators..."
-        />
-        <TextArea
-          label="Highlights (rough notes)"
-          rows={3}
-          value={form.highlights}
-          onChange={update("highlights")}
-          placeholder="key topics, demos, speakers, anything notable"
-        />
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Raw description</label>
-            <textarea
-              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={4}
-              value={form.rawDescription}
-              onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
-              placeholder="Describe the event freely. Gemini will reorganise this."
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
-            <textarea
-              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={2}
-              value={form.instructions}
-              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-              placeholder="E.g., Make the tone more enthusiastic, or specifically highlight the Q&A session..."
-            />
-          </div>
-        </div>
-      </fieldset>
 
-      <fieldset className="space-y-4">
+      {form.docType === "application" ? (
+        <fieldset className="space-y-4">
+          <legend className="text-base font-semibold text-ink">Application details</legend>
+          <Field
+            label="Application Subject / Title"
+            value={form.title}
+            onChange={update("title")}
+            placeholder="e.g. Permission request to book Seminar Hall"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Date"
+              type="date"
+              value={form.date}
+              onChange={update("date")}
+            />
+            <Field
+              label="Sender Name"
+              value={form.senderName || ""}
+              onChange={update("senderName")}
+              placeholder="e.g. Arsh Pathan"
+            />
+          </div>
+          <Field
+            label="Sender Designation / Roll No"
+            value={form.senderDesignation || ""}
+            onChange={update("senderDesignation")}
+            placeholder="e.g. President, AI & ML Club / TE student"
+          />
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Addressed To (Recipient)</label>
+            <textarea
+              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              rows={3}
+              value={form.recipient || ""}
+              onChange={(e) => setForm({ ...form, recipient: e.target.value })}
+              placeholder="e.g. The Principal,&#10;Dhole Patil College of Engineering,&#10;Pune."
+            />
+          </div>
+          <TextArea
+            label="Highlights (rough notes)"
+            rows={2}
+            value={form.highlights}
+            onChange={update("highlights")}
+            placeholder="e.g. Guest speaker Prof. Mane, 50+ students expected..."
+          />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Raw description</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={4}
+                value={form.rawDescription}
+                onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
+                placeholder="Describe the application requirements freely. Gemini will generate the formal text."
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={2}
+                value={form.instructions}
+                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                placeholder="E.g., Make it formal and concise..."
+              />
+            </div>
+          </div>
+        </fieldset>
+      ) : (
+        <fieldset className="space-y-4">
+          <legend className="text-base font-semibold text-ink">Event details</legend>
+          <Field
+            label="Event title"
+            value={form.title}
+            onChange={update("title")}
+            placeholder="Research Paper Presentation"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Date"
+              type="date"
+              value={form.date}
+              onChange={update("date")}
+            />
+            <Field
+              label="Venue"
+              value={form.venue}
+              onChange={update("venue")}
+              placeholder="Seminar Hall, A-Block"
+            />
+          </div>
+          <TextArea
+            label="Participants"
+            rows={2}
+            value={form.participants}
+            onChange={update("participants")}
+            placeholder="TE & BE AI/ML students, faculty coordinators..."
+          />
+          <TextArea
+            label="Highlights (rough notes)"
+            rows={3}
+            value={form.highlights}
+            onChange={update("highlights")}
+            placeholder="key topics, demos, speakers, anything notable"
+          />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Raw description</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={4}
+                value={form.rawDescription}
+                onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
+                placeholder="Describe the event freely. Gemini will reorganise this."
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={2}
+                value={form.instructions}
+                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                placeholder="E.g., Make the tone more enthusiastic, or specifically highlight the Q&A session..."
+              />
+            </div>
+          </div>
+        </fieldset>
+      )}
+
+      <fieldset className="space-y-4 border-t border-gray-100 pt-3">
         <legend className="text-base font-semibold text-ink">Header & signatories</legend>
         <div className="grid grid-cols-2 gap-3">
           <Field
@@ -125,17 +197,19 @@ export function ReportForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-3">
-        <legend className="text-base font-semibold text-ink">Photographs</legend>
-        <ImageDropzone
-          photos={photos}
-          onAdd={(added) => setPhotos([...photos, ...added])}
-          onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
-          onCaption={(id, caption) =>
-            setPhotos(photos.map((p) => (p.id === id ? { ...p, caption } : p)))
-          }
-        />
-      </fieldset>
+      {form.docType !== "application" && (
+        <fieldset className="space-y-3">
+          <legend className="text-base font-semibold text-ink">Photographs</legend>
+          <ImageDropzone
+            photos={photos}
+            onAdd={(added) => setPhotos([...photos, ...added])}
+            onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
+            onCaption={(id, caption) =>
+              setPhotos(photos.map((p) => (p.id === id ? { ...p, caption } : p)))
+            }
+          />
+        </fieldset>
+      )}
 
       {isQuotaError && (
         <div className="rounded border border-amber-200 bg-amber-50 p-4 space-y-3">

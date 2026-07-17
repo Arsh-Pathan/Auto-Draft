@@ -141,61 +141,133 @@ export async function buildDocx(
 ): Promise<Buffer> {
   const { meta, ai, signatories, photographs } = payload;
   const headerBlock = await buildHeaderBlock();
+  const isApp = meta.docType === "application";
 
-  const headerTable = new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders: {
-      top: BORDER,
-      bottom: BORDER,
-      left: BORDER,
-      right: BORDER,
-      insideHorizontal: BORDER,
-      insideVertical: BORDER,
-    },
-    rows: [
-      new TableRow({
+  const docChildren: (Paragraph | Table)[] = [];
+
+  if (isApp) {
+    // Application Letter Layout
+    docChildren.push(...headerBlock);
+
+    // Date (aligned right)
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 120, after: 240 },
         children: [
-          headerCell("ACA/R / 56", { width: 25, alignLeft: true }),
-          headerCell("Dhole Patil College of Engineering", { rowSpan: 2, width: 50 }),
-          headerCell(`AcademicYear:${meta.academicYear}`, { width: 25, alignLeft: true }),
+          new TextRun({
+            text: `Date: ${formatDateShort(meta.date)}`,
+            font: "Calibri",
+            size: 22, // 11pt
+            bold: true,
+          }),
+        ],
+      })
+    );
+
+    // To Recipient
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 60 },
+        children: [
+          new TextRun({ text: "To,", bold: true, font: "Calibri", size: 22 }),
         ],
       }),
-      new TableRow({
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 180 },
         children: [
-          headerCell("Rev: 00", { alignLeft: true }),
-          headerCell(`Semester: ${meta.semester}`, { alignLeft: true }),
+          new TextRun({
+            text: `${meta.recipient || "The Principal,"}\nDhole Patil College of Engineering,\nPune.`,
+            font: "Calibri",
+            size: 22,
+          }),
         ],
-      }),
-      new TableRow({
+      })
+    );
+
+    // Subject
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 180 },
         children: [
-          headerCell("Date: 15.12.2016", { alignLeft: true }),
-          headerCell("Report"),
-          headerCell(`Date- ${formatDateShort(meta.date)}`, { alignLeft: true }),
+          new TextRun({ text: "Subject: ", bold: true, font: "Calibri", size: 22 }),
+          new TextRun({
+            text: meta.title || "Application Request",
+            bold: true,
+            font: "Calibri",
+            size: 22,
+            underline: { type: UnderlineType.SINGLE },
+          }),
         ],
-      }),
-    ],
-  });
+      })
+    );
 
-  const titleParagraph = new Paragraph({
-    alignment: AlignmentType.CENTER,
-    keepNext: true,
-    spacing: { before: 360, after: 240 },
-    children: [
-      new TextRun({
-        text: meta.title,
-        bold: true,
-        size: 28, // 14pt
-        font: "Calibri",
-        underline: { type: UnderlineType.SINGLE },
-      }),
-    ],
-  });
+    // Salutation
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 120 },
+        children: [
+          new TextRun({ text: "Respected Sir/Madam,", font: "Calibri", size: 22 }),
+        ],
+      })
+    );
+  } else {
+    // Standard Report Layout
+    const headerTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: BORDER,
+        bottom: BORDER,
+        left: BORDER,
+        right: BORDER,
+        insideHorizontal: BORDER,
+        insideVertical: BORDER,
+      },
+      rows: [
+        new TableRow({
+          children: [
+            headerCell("ACA/R / 56", { width: 25, alignLeft: true }),
+            headerCell("Dhole Patil College of Engineering", { rowSpan: 2, width: 50 }),
+            headerCell(`AcademicYear:${meta.academicYear}`, { width: 25, alignLeft: true }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            headerCell("Rev: 00", { alignLeft: true }),
+            headerCell(`Semester: ${meta.semester}`, { alignLeft: true }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            headerCell("Date: 15.12.2016", { alignLeft: true }),
+            headerCell("Report"),
+            headerCell(`Date- ${formatDateShort(meta.date)}`, { alignLeft: true }),
+          ],
+        }),
+      ],
+    });
 
-  const docChildren: (Paragraph | Table)[] = [
-    ...headerBlock,
-    headerTable,
-    titleParagraph,
-  ];
+    const titleParagraph = new Paragraph({
+      alignment: AlignmentType.CENTER,
+      keepNext: true,
+      spacing: { before: 360, after: 240 },
+      children: [
+        new TextRun({
+          text: meta.title,
+          bold: true,
+          size: 28, // 14pt
+          font: "Calibri",
+          underline: { type: UnderlineType.SINGLE },
+        }),
+      ],
+    });
+
+    docChildren.push(...headerBlock, headerTable, titleParagraph);
+  }
 
   ai.sections.forEach((sec) => {
     if (sec.heading) {
@@ -335,8 +407,35 @@ export async function buildDocx(
     ],
   });
 
+  if (isApp) {
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 240, after: 120 },
+        children: [
+          new TextRun({ text: "Yours faithfully,", font: "Calibri", size: 22 }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 480, after: 60 },
+        children: [
+          new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 22 }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 240 },
+        children: [
+          new TextRun({ text: meta.senderDesignation || "Student", font: "Calibri", size: 22 }),
+        ],
+      })
+    );
+  }
+
   // Add several empty paragraphs for signing space so they can gracefully wrap across pages if needed
-  for (let i = 0; i < 5; i++) {
+  const signingGap = isApp ? 2 : 5;
+  for (let i = 0; i < signingGap; i++) {
     docChildren.push(new Paragraph({ text: "" }));
   }
   docChildren.push(signatureTable);

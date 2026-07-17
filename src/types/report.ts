@@ -30,6 +30,10 @@ export type ReportMeta = {
   participants: string;
   acaRNo: string;
   revNo: string;
+  docType?: "report" | "application";
+  recipient?: string;
+  senderName?: string;
+  senderDesignation?: string;
 };
 
 export type Photograph = {
@@ -67,4 +71,8 @@ export type FormState = {
   advisor: string;
   sdpHead: string;
   principal: string;
+  docType?: "report" | "application";
+  recipient?: string;
+  senderName?: string;
+  senderDesignation?: string;
 };

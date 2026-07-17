@@ -16,6 +16,10 @@ type Meta = {
   instructions?: string;
   photoCaptions?: string[];
   apiKey?: string;
+  docType?: "report" | "application";
+  recipient?: string;
+  senderName?: string;
+  senderDesignation?: string;
 };
 
 export async function POST(req: Request) {
@@ -52,6 +56,10 @@ export async function POST(req: Request) {
         rawDescription: String(meta.rawDescription || ""),
         instructions: String(meta.instructions || ""),
         photos,
+        docType: meta.docType,
+        recipient: meta.recipient ? String(meta.recipient) : undefined,
+        senderName: meta.senderName ? String(meta.senderName) : undefined,
+        senderDesignation: meta.senderDesignation ? String(meta.senderDesignation) : undefined,
       },
       meta.apiKey ? String(meta.apiKey) : undefined
     );

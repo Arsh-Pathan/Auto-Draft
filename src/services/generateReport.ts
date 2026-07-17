@@ -36,6 +36,28 @@ PHOTO HANDLING:
 
 If no photos are supplied, do not emit any image sections.`;
 
+const SYSTEM_PROMPT_APPLICATION = `You are a formal academic letter writer for Dhole Patil College of Engineering. Convert the user's raw notes and requirements into a structured, formal letter (e.g., leave application, permission request, budget approval).
+
+Tone: formal, respectful, polite, first or third person as appropriate, no marketing fluff, no emojis, Indian English spelling. Write professionally, addressing the recipient appropriately. Do not invent facts not implied by the input.
+
+Return ONLY a JSON object matching this schema. No prose, no markdown, no code fences.
+
+{
+  "generatedTitle": "String (A short, professional Subject for the application, e.g., 'Permission to Book Seminar Hall for AI Workshop')",
+  "sections": [
+    {
+      "id": "unique-string-id",
+      "heading": "String (Optional section headings if the application has sub-sections like 'Timeline', 'Budget Overview'. Otherwise leave empty for standard letter paragraphs).",
+      "type": "text | bullets | table",
+      "text": "String (only if type is 'text' - used for the main paragraphs of the letter)",
+      "bullets": ["String array"] (only if type is 'bullets'),
+      "table": [["Col 1", "Col 2"]] (only if type is 'table')
+    }
+  ]
+}
+
+Structure the letter intelligently. Ensure it is addressed properly and flows logically from introduction to specific request and explanation, concluding politely.`;
+
 const REPORT_JSON_SCHEMA = {
   type: "object",
   properties: {
@@ -76,9 +98,30 @@ export type GenerateInput = {
   rawDescription: string;
   instructions: string;
   photos?: GeneratePhoto[];
+  docType?: "report" | "application";
+  recipient?: string;
+  senderName?: string;
+  senderDesignation?: string;
 };
 
 function buildUserMessage(input: GenerateInput): string {
+  if (input.docType === "application") {
+    const base = [
+      `DOCUMENT TYPE: Academic Letter / Application`,
+      `SUBJECT/TITLE: ${input.title || "(not provided)"}`,
+      `DATE: ${input.date || "(not provided)"}`,
+      `RECIPIENT: ${input.recipient || "(not provided)"}`,
+      `SENDER NAME: ${input.senderName || "(not provided)"}`,
+      `SENDER DESIGNATION: ${input.senderDesignation || "(not provided)"}`,
+      `RAW DESCRIPTION / DETAILS: ${input.rawDescription || "(not provided)"}`,
+      `KEY HIGHLIGHTS / NOTES: ${input.highlights || "(not provided)"}`,
+    ];
+    if (input.instructions) {
+      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+    }
+    return base.join("\n");
+  }
+
   const base = [
     `EVENT TITLE: ${input.title || "(not provided)"}`,
     `DATE: ${input.date || "(not provided)"}`,
@@ -116,8 +159,10 @@ export async function generateReport(input: GenerateInput, userApiKey?: string):
     base64: p.base64,
   }));
 
+  const systemPrompt = input.docType === "application" ? SYSTEM_PROMPT_APPLICATION : SYSTEM_PROMPT;
+
   const messages: ChatMessage[] = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: systemPrompt },
     {
       role: "user",
       content: buildUserMessage(input),
