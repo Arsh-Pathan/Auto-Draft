@@ -11,6 +11,8 @@ export const SIGNATORIES = {
   advisor: "Prof. Yugashree Pawar",
   sdpHead: "Dr. Vishvas Kalunge / Prof. Sandip Kale",
   principal: "Dr. Abhijit Dandavate",
+  technicalLead: "Mr. Arsh Pathan / Miss. Vedika Pathode",
+  eventCoordinator: "Event Coordinator",
 };
 
 export const CLUB_NAME = "AI & ML Club";

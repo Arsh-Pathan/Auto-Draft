@@ -20,6 +20,8 @@ export const ReportDataSchema = z.object({
 
 export type ReportData = z.infer<typeof ReportDataSchema>;
 
+export type DocType = "report" | "application" | "closing_meeting" | "project_proposal";
+
 export type ReportMeta = {
   college: string;
   academicYear: string;
@@ -30,10 +32,33 @@ export type ReportMeta = {
   participants: string;
   acaRNo: string;
   revNo: string;
-  docType?: "report" | "application";
+  docType?: DocType;
   recipient?: string;
   senderName?: string;
   senderDesignation?: string;
+  // Closing Meeting fields
+  organizedBy?: string;
+  facultyCoordinator?: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  eventCoordinator?: string;
+  // Project Proposal fields
+  projectTrack?: string;
+  teamStructure?: string;
+  conceptIdea?: string;
+  techStack?: string;
+  totalFinancialRequest?: string;
+  hardwareSourcing?: string;
+  labAccess?: string;
+  clubLabSpace?: string;
+  sprintAgreement?: string;
+  vettingProtocol?: string;
+  architectureLink?: string;
+  sensorDiagramLink?: string;
+  videoLinks?: string;
+  paperLinks?: string;
+  technicalLead?: string;
 };
 
 export type Photograph = {
@@ -47,6 +72,8 @@ export type Signatories = {
   advisor: string;
   sdpHead: string;
   principal: string;
+  technicalLead?: string;
+  eventCoordinator?: string;
 };
 
 export type ReportPayload = {
@@ -71,8 +98,31 @@ export type FormState = {
   advisor: string;
   sdpHead: string;
   principal: string;
-  docType?: "report" | "application";
+  docType?: DocType;
   recipient?: string;
   senderName?: string;
   senderDesignation?: string;
+  // Closing Meeting fields
+  organizedBy?: string;
+  facultyCoordinator?: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  eventCoordinator?: string;
+  // Project Proposal fields
+  projectTrack?: string;
+  teamStructure?: string;
+  conceptIdea?: string;
+  techStack?: string;
+  totalFinancialRequest?: string;
+  hardwareSourcing?: string;
+  labAccess?: string;
+  clubLabSpace?: string;
+  sprintAgreement?: string;
+  vettingProtocol?: string;
+  architectureLink?: string;
+  sensorDiagramLink?: string;
+  videoLinks?: string;
+  paperLinks?: string;
+  technicalLead?: string;
 };

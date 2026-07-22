@@ -1,5 +1,5 @@
 import "server-only";
-import { ReportDataSchema, type ReportData } from "@/types/report";
+import { ReportDataSchema, type ReportData, type DocType } from "@/types/report";
 import { callGemini, type ChatMessage, type ChatImage } from "@/backend/gemini";
 
 const SYSTEM_PROMPT = `You are a formal academic report writer for the AI & ML Club at Dhole Patil College of Engineering. Convert the user's messy notes into a structured event report.
@@ -19,7 +19,7 @@ Return ONLY a JSON object matching this schema. No prose, no markdown, no code f
       "bullets": ["String array"] (only if type is 'bullets'),
       "table": [["Row 1 Col 1", "Row 1 Col 2"], ["Row 2 Col 1", "Row 2 Col 2"]] (only if type is 'table'),
       "imageIndex": 0 (only if type is 'image', integer corresponding to uploaded photos index),
-      "imageCaption": "String (only if type is 'image'). A short, formal label (max ~12 words) describing what the photograph shows. Examples: 'Participants engaging in the hands-on session', 'Keynote address by the chief guest'."
+      "imageCaption": "String (only if type is 'image'). A short, formal label (max ~12 words) describing what the photograph shows."
     }
   ]
 }
@@ -27,14 +27,9 @@ Return ONLY a JSON object matching this schema. No prose, no markdown, no code f
 Structure the report intelligently. Use tables if appropriate for comparing data or schedules. Use bullets for objectives or key points.
 
 PHOTO HANDLING:
-- The user attaches photographs as inline images in this conversation, in the same order as the PHOTOS list in the user message.
-- Look at each image and use it to inform the placement and caption.
 - Emit one section with type "image" for EVERY photograph supplied, using imageIndex 0..N-1 matching the photo order.
-- Place each image section at a contextually appropriate point in the report (e.g. after the section it visually illustrates), interleaved between text/bullet sections, NOT all clumped at the end.
-- imageCaption must be a formal, descriptive label written by you based on what is visible in the photo. The user's hand-typed caption (if any) is shown in the PHOTOS list; if the user supplied one, you may reuse or refine it, otherwise write your own.
-- Image sections should have heading set to an empty string.
-
-If no photos are supplied, do not emit any image sections.`;
+- Place each image section contextually interleaved between text/bullet sections.
+- Image sections should have heading set to an empty string.`;
 
 const SYSTEM_PROMPT_APPLICATION = `You are a formal academic letter writer for Dhole Patil College of Engineering. Convert the user's raw notes and requirements into a structured, formal letter (e.g., leave application, permission request, budget approval).
 
@@ -47,16 +42,38 @@ Return ONLY a JSON object matching this schema. No prose, no markdown, no code f
   "sections": [
     {
       "id": "unique-string-id",
-      "heading": "String (Optional section headings if the application has sub-sections like 'Timeline', 'Budget Overview'. Otherwise leave empty for standard letter paragraphs).",
+      "heading": "String (Optional section headings if the application has sub-sections).",
       "type": "text | bullets | table",
-      "text": "String (only if type is 'text' - used for the main paragraphs of the letter)",
+      "text": "String (only if type is 'text')",
       "bullets": ["String array"] (only if type is 'bullets'),
       "table": [["Col 1", "Col 2"]] (only if type is 'table')
     }
   ]
-}
+}`;
 
-Structure the letter intelligently. Ensure it is addressed properly and flows logically from introduction to specific request and explanation, concluding politely.`;
+const SYSTEM_PROMPT_CLOSING_MEETING = `You are a formal academic report writer for Student Development Program (SDP) & AI & ML Club at Dhole Patil College of Engineering. Produce structured content for a Closing Meeting Report.
+
+Generate sections corresponding to:
+1. Brief description of the event (heading: "1. Brief Description of the Event", type: "text")
+2. Event Summary (heading: "2. Event Summary", type: "bullets" or "text")
+3. Challenges Faced During Conduction (heading: "3. Challenges Faced During Conduction", type: "bullets")
+4. Suggestions & Recommendations from organizing team members (heading: "4. Suggestions & Recommendations from Organizing Team Members", type: "bullets")
+5. Suggestions & Recommendations from Management (heading: "5. Suggestions & Recommendations from Management", type: "bullets")
+
+Tone: formal, objective, constructive, Indian English spelling.
+Return ONLY a JSON object with generatedTitle and sections matching the schema.`;
+
+const SYSTEM_PROMPT_PROJECT_PROPOSAL = `You are a technical proposal writer for the AI & ML Club at Dhole Patil College of Engineering. Produce structured sections for an official Project Proposal Form.
+
+Generate sections covering:
+1. Executive Concept Overview (heading: "Concept Overview", type: "text")
+2. Technical Architecture & Tech Stack (heading: "Technical Architecture & Stack", type: "bullets")
+3. Resource & Component Requirements (heading: "Required Resources & Components", type: "table" or "bullets")
+4. Implementation Plan & Milestones (heading: "30-Day Sprint Milestones", type: "bullets")
+5. Expected Outcomes & Deliverables (heading: "Expected Project Outcomes", type: "text")
+
+Tone: technical, innovative, precise, professional, Indian English spelling.
+Return ONLY a JSON object with generatedTitle (Subject) and sections matching the schema.`;
 
 const REPORT_JSON_SCHEMA = {
   type: "object",
@@ -98,10 +115,19 @@ export type GenerateInput = {
   rawDescription: string;
   instructions: string;
   photos?: GeneratePhoto[];
-  docType?: "report" | "application";
+  docType?: DocType;
   recipient?: string;
   senderName?: string;
   senderDesignation?: string;
+  organizedBy?: string;
+  facultyCoordinator?: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  projectTrack?: string;
+  teamStructure?: string;
+  techStack?: string;
+  totalFinancialRequest?: string;
 };
 
 function buildUserMessage(input: GenerateInput): string {
@@ -115,6 +141,44 @@ function buildUserMessage(input: GenerateInput): string {
       `SENDER DESIGNATION: ${input.senderDesignation || "(not provided)"}`,
       `RAW DESCRIPTION / DETAILS: ${input.rawDescription || "(not provided)"}`,
       `KEY HIGHLIGHTS / NOTES: ${input.highlights || "(not provided)"}`,
+    ];
+    if (input.instructions) {
+      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+    }
+    return base.join("\n");
+  }
+
+  if (input.docType === "closing_meeting") {
+    const base = [
+      `DOCUMENT TYPE: Closing Meeting Report`,
+      `EVENT TITLE: ${input.title || "(not provided)"}`,
+      `ORGANIZED BY: ${input.organizedBy || "(not provided)"}`,
+      `FACULTY COORDINATOR: ${input.facultyCoordinator || "(not provided)"}`,
+      `DATE: ${input.date || "(not provided)"}`,
+      `VENUE: ${input.venue || "(not provided)"}`,
+      `START TIME: ${input.startTime || "(not provided)"}`,
+      `END TIME: ${input.endTime || "(not provided)"}`,
+      `TOTAL DURATION: ${input.duration || "(not provided)"}`,
+      `PARTICIPANTS: ${input.participants || "(not provided)"}`,
+      `RAW NOTES / WHAT HAPPENED: ${input.rawDescription || "(not provided)"}`,
+      `KEY HIGHLIGHTS / CHALLENGES: ${input.highlights || "(not provided)"}`,
+    ];
+    if (input.instructions) {
+      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+    }
+    return base.join("\n");
+  }
+
+  if (input.docType === "project_proposal") {
+    const base = [
+      `DOCUMENT TYPE: AI & ML Project Proposal Form`,
+      `PROJECT TITLE: ${input.title || "(not provided)"}`,
+      `TRACK: ${input.projectTrack || "(not provided)"}`,
+      `TEAM STRUCTURE: ${input.teamStructure || "(not provided)"}`,
+      `TECH STACK: ${input.techStack || "(not provided)"}`,
+      `FINANCIAL REQUEST: ${input.totalFinancialRequest || "(not provided)"}`,
+      `RAW DESCRIPTION / CONCEPT: ${input.rawDescription || "(not provided)"}`,
+      `KEY HIGHLIGHTS / REQUIREMENTS: ${input.highlights || "(not provided)"}`,
     ];
     if (input.instructions) {
       base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
@@ -153,13 +217,26 @@ function tryParseJson(raw: string): unknown {
   return JSON.parse(trimmed);
 }
 
+function getSystemPrompt(docType?: DocType): string {
+  switch (docType) {
+    case "application":
+      return SYSTEM_PROMPT_APPLICATION;
+    case "closing_meeting":
+      return SYSTEM_PROMPT_CLOSING_MEETING;
+    case "project_proposal":
+      return SYSTEM_PROMPT_PROJECT_PROPOSAL;
+    default:
+      return SYSTEM_PROMPT;
+  }
+}
+
 export async function generateReport(input: GenerateInput, userApiKey?: string): Promise<ReportData> {
   const images: ChatImage[] | undefined = input.photos?.map((p) => ({
     mime: p.mime,
     base64: p.base64,
   }));
 
-  const systemPrompt = input.docType === "application" ? SYSTEM_PROMPT_APPLICATION : SYSTEM_PROMPT;
+  const systemPrompt = getSystemPrompt(input.docType);
 
   const messages: ChatMessage[] = [
     { role: "system", content: systemPrompt },

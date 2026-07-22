@@ -142,10 +142,126 @@ export async function buildDocx(
   const { meta, ai, signatories, photographs } = payload;
   const headerBlock = await buildHeaderBlock();
   const isApp = meta.docType === "application";
+  const isClosing = meta.docType === "closing_meeting";
+  const isProposal = meta.docType === "project_proposal";
 
   const docChildren: (Paragraph | Table)[] = [];
 
-  if (isApp) {
+  if (isClosing) {
+    // Closing Meeting Report Layout
+    docChildren.push(
+      ...headerBlock,
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 100, after: 40 },
+        children: [new TextRun({ text: "Sagar Dhole Patil Sir’s", bold: true, font: "Calibri", size: 22 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 180 },
+        children: [new TextRun({ text: "Student Development Program (SDP)", bold: true, font: "Calibri", size: 26, color: "1E3A8A" })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 240 },
+        children: [new TextRun({ text: "Closing Meeting Report", bold: true, font: "Calibri", size: 32, underline: { type: UnderlineType.SINGLE } })],
+      })
+    );
+
+    // Metadata Table
+    const metaTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: ALL_BORDERS,
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: "Event Title:", bold: true, font: "Calibri", size: 22 })] })] }),
+            new TableCell({ width: { size: 75, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: meta.title, font: "Calibri", size: 22 })] })] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: "Organized By:", bold: true, font: "Calibri", size: 22 })] })] }),
+            new TableCell({ width: { size: 75, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: `${meta.organizedBy || "AI & ML Club"}  |  Date: ${formatDateShort(meta.date)}  |  Venue: ${meta.venue || "Campus"}`, font: "Calibri", size: 22 })] })] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: "Faculty Coordinator:", bold: true, font: "Calibri", size: 22 })] })] }),
+            new TableCell({ width: { size: 75, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: meta.facultyCoordinator || "Department Faculty", font: "Calibri", size: 22 })] })] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: "Event Summary:", bold: true, font: "Calibri", size: 22 })] })] }),
+            new TableCell({ width: { size: 75, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ children: [new TextRun({ text: `Start: ${meta.startTime || "10:00 AM"} | End: ${meta.endTime || "04:00 PM"} | Duration: ${meta.duration || "6 Hours"} | Participants: ${meta.participants || "N/A"}`, font: "Calibri", size: 22 })] })] }),
+          ],
+        }),
+      ],
+    });
+    docChildren.push(metaTable, new Paragraph({ spacing: { after: 200 }, children: [] }));
+  } else if (isProposal) {
+    // Project Proposal Form Layout
+    docChildren.push(
+      ...headerBlock,
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 120, after: 240 },
+        children: [new TextRun({ text: "PROJECT PROPOSAL FORM", bold: true, font: "Calibri", size: 32, underline: { type: UnderlineType.SINGLE } })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 60 },
+        children: [new TextRun({ text: "To,", bold: true, font: "Calibri", size: 22 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 180 },
+        children: [new TextRun({ text: "The Club Advisor,\nAI & ML Club,\nDhole Patil College of Engineering, Pune", font: "Calibri", size: 22 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 180 },
+        children: [
+          new TextRun({ text: "Subject: ", bold: true, font: "Calibri", size: 22 }),
+          new TextRun({ text: `Proposal for AI & ML Club Project Approval: ${meta.title}`, bold: true, font: "Calibri", size: 22, underline: { type: UnderlineType.SINGLE } }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 120 },
+        children: [new TextRun({ text: "Respected Madam,", font: "Calibri", size: 22 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { after: 240 },
+        children: [
+          new TextRun({
+            text: `I am writing to formally apply for a project slot in the upcoming AI & ML Club project sprint. I propose to develop an advanced `,
+            font: "Calibri",
+            size: 22,
+          }),
+          new TextRun({ text: `${meta.projectTrack || "Software / Hardware"} `, bold: true, font: "Calibri", size: 22 }),
+          new TextRun({ text: `platform, titled `, font: "Calibri", size: 22 }),
+          new TextRun({ text: `"${meta.title}"`, bold: true, font: "Calibri", size: 22 }),
+          new TextRun({ text: `. This application details the concept, required resources, infrastructure access, and technical support requested for successful completion within our strict 30-day timeline.`, font: "Calibri", size: 22 }),
+        ],
+      })
+    );
+
+    const proposalMetaTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: ALL_BORDERS,
+      rows: [
+        new TableRow({ children: [new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: "Project Track:", bold: true, font: "Calibri", size: 22 })] })] }), new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: meta.projectTrack || "Software / Hardware", font: "Calibri", size: 22 })] })] })] }),
+        new TableRow({ children: [new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: "Team Structure:", bold: true, font: "Calibri", size: 22 })] })] }), new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: meta.teamStructure || "AI & ML Club Member", font: "Calibri", size: 22 })] })] })] }),
+        new TableRow({ children: [new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: "Tech Stack:", bold: true, font: "Calibri", size: 22 })] })] }), new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: meta.techStack || "Python, PyTorch, React, Next.js", font: "Calibri", size: 22 })] })] })] }),
+        new TableRow({ children: [new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: "Financial Request:", bold: true, font: "Calibri", size: 22 })] })] }), new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: meta.totalFinancialRequest || "₹ 0 (Self-funded / Software)", font: "Calibri", size: 22 })] })] })] }),
+        new TableRow({ children: [new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: "30-Day Sprint Agreement:", bold: true, font: "Calibri", size: 22 })] })] }), new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, borders: ALL_BORDERS, margins: { top: 80, bottom: 80, left: 80, right: 80 }, children: [new Paragraph({ children: [new TextRun({ text: meta.sprintAgreement || "Yes - Fully Committed", font: "Calibri", size: 22 })] })] })] }),
+      ],
+    });
+    docChildren.push(proposalMetaTable, new Paragraph({ spacing: { after: 200 }, children: [] }));
+  } else if (isApp) {
     // Application Letter Layout
     docChildren.push(...headerBlock);
 
@@ -351,94 +467,169 @@ export async function buildDocx(
     }
   });
 
-  const signatureTable = new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders: {
-      top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-      insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-    },
-    rows: [
-      new TableRow({
-        cantSplit: true,
-        children: [
-          { role: "Club Advisor", name: signatories.advisor },
-          { role: "SDP Head", name: signatories.sdpHead },
-          { role: "Principal", name: signatories.principal }
-        ].map(
-          (sig) =>
-            new TableCell({
-              width: { size: 33, type: WidthType.PERCENTAGE },
-              borders: {
-                top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-              },
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
-                  children: [
-                    new TextRun({
-                      text: sig.role,
-                      bold: true,
-                      font: "Calibri",
-                      size: 24,
-                    }),
-                  ],
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
-                  children: [
-                    new TextRun({
-                      text: sig.name,
-                      font: "Calibri",
-                      size: 24,
-                    }),
-                  ],
-                }),
-              ],
-            })
-        ),
-      }),
-    ],
-  });
+  if (isClosing) {
+    // Attendance Table
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 360, after: 180 },
+        children: [new TextRun({ text: "Closing Meeting Attendance", bold: true, font: "Calibri", size: 28, underline: { type: UnderlineType.SINGLE } })],
+      })
+    );
+    const attendanceTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: ALL_BORDERS,
+      rows: [
+        new TableRow({
+          children: [
+            headerCell("Sr. No", { width: 10 }),
+            headerCell("Name of Faculty / Member", { width: 45 }),
+            headerCell("Designation", { width: 25 }),
+            headerCell("Signature", { width: 20 }),
+          ],
+        }),
+        new TableRow({ children: [headerCell("1", { width: 10 }), headerCell(signatories.advisor, { width: 45, alignLeft: true }), headerCell("Club Advisor", { width: 25, alignLeft: true }), headerCell("", { width: 20 })] }),
+        new TableRow({ children: [headerCell("2", { width: 10 }), headerCell(signatories.sdpHead, { width: 45, alignLeft: true }), headerCell("Head - SDP", { width: 25, alignLeft: true }), headerCell("", { width: 20 })] }),
+        new TableRow({ children: [headerCell("3", { width: 10 }), headerCell(meta.facultyCoordinator || "Faculty Coordinator", { width: 45, alignLeft: true }), headerCell("Faculty Coordinator", { width: 25, alignLeft: true }), headerCell("", { width: 20 })] }),
+      ],
+    });
+    docChildren.push(attendanceTable);
 
-  if (isApp) {
+    const closingSigTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: { top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Event Coordinator", bold: true, font: "Calibri", size: 24 })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: meta.eventCoordinator || signatories.eventCoordinator || "Event Coordinator", font: "Calibri", size: 24 })] }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Head - SDP", bold: true, font: "Calibri", size: 24 })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: signatories.sdpHead, font: "Calibri", size: 24 })] }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+    for (let i = 0; i < 4; i++) docChildren.push(new Paragraph({ text: "" }));
+    docChildren.push(closingSigTable);
+  } else if (isProposal) {
     docChildren.push(
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        spacing: { before: 240, after: 120 },
-        children: [
-          new TextRun({ text: "Yours faithfully,", font: "Calibri", size: 22 }),
-        ],
+        spacing: { before: 240, after: 60 },
+        children: [new TextRun({ text: "Yours faithfully,", font: "Calibri", size: 22 })],
       }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        spacing: { before: 480, after: 60 },
-        children: [
-          new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 22 }),
-        ],
+        spacing: { after: 40 },
+        children: [new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 22 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 40 },
+        children: [new TextRun({ text: "Member, AI & ML Club", font: "Calibri", size: 22 })],
       }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
         spacing: { after: 240 },
-        children: [
-          new TextRun({ text: meta.senderDesignation || "Student", font: "Calibri", size: 22 }),
-        ],
+        children: [new TextRun({ text: `Date: ${formatDateShort(meta.date)}`, font: "Calibri", size: 22 })],
       })
     );
-  }
 
-  // Add several empty paragraphs for signing space so they can gracefully wrap across pages if needed
-  const signingGap = isApp ? 2 : 5;
-  for (let i = 0; i < signingGap; i++) {
-    docChildren.push(new Paragraph({ text: "" }));
+    const proposalSigTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: { top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } },
+      rows: [
+        new TableRow({
+          children: [
+            { role: "Technical Lead", name: signatories.technicalLead || "Mr. Arsh Pathan / Miss. Vedika Pathode" },
+            { role: "Club Advisor", name: signatories.advisor },
+            { role: "SDP Head", name: signatories.sdpHead },
+          ].map((sig) => new TableCell({
+            width: { size: 33, type: WidthType.PERCENTAGE },
+            children: [
+              new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: sig.role, bold: true, font: "Calibri", size: 24 })] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: sig.name, font: "Calibri", size: 24 })] }),
+            ],
+          })),
+        }),
+      ],
+    });
+    for (let i = 0; i < 4; i++) docChildren.push(new Paragraph({ text: "" }));
+    docChildren.push(proposalSigTable);
+  } else {
+    const signatureTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      },
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            { role: "Club Advisor", name: signatories.advisor },
+            { role: "SDP Head", name: signatories.sdpHead },
+            { role: "Principal", name: signatories.principal }
+          ].map(
+            (sig) =>
+              new TableCell({
+                width: { size: 33, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [new TextRun({ text: sig.role, bold: true, font: "Calibri", size: 24 })],
+                  }),
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [new TextRun({ text: sig.name, font: "Calibri", size: 24 })],
+                  }),
+                ],
+              })
+          ),
+        }),
+      ],
+    });
+
+    if (isApp) {
+      docChildren.push(
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 240, after: 120 },
+          children: [new TextRun({ text: "Yours faithfully,", font: "Calibri", size: 22 })],
+        }),
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 480, after: 60 },
+          children: [new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 22 })],
+        }),
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 240 },
+          children: [new TextRun({ text: meta.senderDesignation || "Student", font: "Calibri", size: 22 })],
+        })
+      );
+    }
+
+    const signingGap = isApp ? 2 : 5;
+    for (let i = 0; i < signingGap; i++) {
+      docChildren.push(new Paragraph({ text: "" }));
+    }
+    docChildren.push(signatureTable);
   }
-  docChildren.push(signatureTable);
 
   const doc = new Document({
     creator: "AutoReport",

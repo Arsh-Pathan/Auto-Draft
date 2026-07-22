@@ -47,7 +47,148 @@ export function ReportForm({
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
 
-      {form.docType === "application" ? (
+      {form.docType === "closing_meeting" ? (
+        <fieldset className="space-y-4">
+          <legend className="text-base font-semibold text-ink">Closing Meeting Details</legend>
+          <Field
+            label="Event Title"
+            value={form.title}
+            onChange={update("title")}
+            placeholder="e.g. AI & ML Workshop Closing Meeting"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Organized By"
+              value={form.organizedBy || ""}
+              onChange={update("organizedBy")}
+              placeholder="e.g. AI & ML Club"
+            />
+            <Field
+              label="Faculty Coordinator"
+              value={form.facultyCoordinator || ""}
+              onChange={update("facultyCoordinator")}
+              placeholder="e.g. Prof. Yugashree Pawar"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Date" type="date" value={form.date} onChange={update("date")} />
+            <Field label="Venue" value={form.venue} onChange={update("venue")} placeholder="Seminar Hall" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Start Time" value={form.startTime || ""} onChange={update("startTime")} placeholder="10:00 AM" />
+            <Field label="End Time" value={form.endTime || ""} onChange={update("endTime")} placeholder="04:00 PM" />
+            <Field label="Duration" value={form.duration || ""} onChange={update("duration")} placeholder="6 Hours" />
+          </div>
+          <TextArea
+            label="Participants Summary"
+            rows={2}
+            value={form.participants}
+            onChange={update("participants")}
+            placeholder="e.g. 85 Students & 4 Faculty Coordinators"
+          />
+          <TextArea
+            label="Key Challenges & Recommendations (rough notes)"
+            rows={3}
+            value={form.highlights}
+            onChange={update("highlights")}
+            placeholder="Bullet points of challenges faced, team recommendations..."
+          />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Raw Description / Narrative</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={4}
+                value={form.rawDescription}
+                onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
+                placeholder="Describe the meeting discussions, outcome, and recommendations."
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={2}
+                value={form.instructions}
+                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                placeholder="E.g., Highlight specific suggestions from management..."
+              />
+            </div>
+          </div>
+        </fieldset>
+      ) : form.docType === "project_proposal" ? (
+        <fieldset className="space-y-4">
+          <legend className="text-base font-semibold text-ink">Project Proposal Details</legend>
+          <Field
+            label="Project Title"
+            value={form.title}
+            onChange={update("title")}
+            placeholder="e.g. Autonomous Campus Navigation Drone"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Project Track"
+              value={form.projectTrack || ""}
+              onChange={update("projectTrack")}
+              placeholder="Hardware Track / Software Track"
+            />
+            <Field label="Application Date" type="date" value={form.date} onChange={update("date")} />
+          </div>
+          <Field
+            label="Applicant / Team Lead Name"
+            value={form.senderName || ""}
+            onChange={update("senderName")}
+            placeholder="e.g. Arsh Pathan"
+          />
+          <Field
+            label="Team Structure"
+            value={form.teamStructure || ""}
+            onChange={update("teamStructure")}
+            placeholder="Team — Arsh Pathan & Vedika Pathode (Dept of AI & ML)"
+          />
+          <Field
+            label="Tech Stack & Microcontrollers"
+            value={form.techStack || ""}
+            onChange={update("techStack")}
+            placeholder="Python, PyTorch, ESP32, React, OpenCV"
+          />
+          <Field
+            label="Total Financial Request (₹)"
+            value={form.totalFinancialRequest || ""}
+            onChange={update("totalFinancialRequest")}
+            placeholder="₹ 2,500 or ₹ 0"
+          />
+          <TextArea
+            label="Resource & Lab Access Requests (rough notes)"
+            rows={3}
+            value={form.highlights}
+            onChange={update("highlights")}
+            placeholder="e.g. 3D printing slot in innovation lab, off-class hours AI lab access"
+          />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Project Concept & Problem Statement</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={4}
+                value={form.rawDescription}
+                onChange={(e) => setForm({ ...form, rawDescription: e.target.value })}
+                placeholder="2-3 sentences explaining technical architecture, components, and target goal."
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Specific AI Instructions (Optional)</label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={2}
+                value={form.instructions}
+                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                placeholder="E.g., Emphasize hardware integration and 30-day timeline..."
+              />
+            </div>
+          </div>
+        </fieldset>
+      ) : form.docType === "application" ? (
         <fieldset className="space-y-4">
           <legend className="text-base font-semibold text-ink">Application details</legend>
           <Field
@@ -193,7 +334,13 @@ export function ReportForm({
         <div className="grid grid-cols-3 gap-3">
           <Field label="Club Advisor" value={form.advisor} onChange={update("advisor")} />
           <Field label="SDP Head" value={form.sdpHead} onChange={update("sdpHead")} />
-          <Field label="Principal" value={form.principal} onChange={update("principal")} />
+          {form.docType === "project_proposal" ? (
+            <Field label="Technical Lead" value={form.technicalLead || ""} onChange={update("technicalLead")} />
+          ) : form.docType === "closing_meeting" ? (
+            <Field label="Event Coordinator" value={form.eventCoordinator || ""} onChange={update("eventCoordinator")} />
+          ) : (
+            <Field label="Principal" value={form.principal} onChange={update("principal")} />
+          )}
         </div>
       </fieldset>
 

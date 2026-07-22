@@ -4,11 +4,12 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ImageDropzone, type LocalPhoto } from "@/frontend/ImageDropzone";
 import { REPORT_DEFAULTS, SIGNATORIES } from "@/utils/constants";
+import type { DocType } from "@/types/report";
 
 function WizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const docType = (searchParams.get("type") || "report") as "report" | "application";
+  const docType = (searchParams.get("type") || "report") as DocType;
 
   // State Management
   const [step, setStep] = useState(1);
@@ -28,6 +29,20 @@ function WizardContent() {
   const [recipient, setRecipient] = useState("The Principal,\nDhole Patil College of Engineering,\nPune.");
   const [senderName, setSenderName] = useState("");
   const [senderDesignation, setSenderDesignation] = useState("Student, Department of AI & ML");
+  
+  // Closing Meeting specific state
+  const [organizedBy, setOrganizedBy] = useState("AI & ML Club");
+  const [facultyCoordinator, setFacultyCoordinator] = useState("");
+  const [startTime, setStartTime] = useState("10:00 AM");
+  const [endTime, setEndTime] = useState("04:00 PM");
+  const [duration, setDuration] = useState("6 Hours");
+
+  // Project Proposal specific state
+  const [projectTrack, setProjectTrack] = useState("Software Track");
+  const [teamStructure, setTeamStructure] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [totalFinancialRequest, setTotalFinancialRequest] = useState("₹ 0 (Self-funded / Software)");
+
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState("Preparing draft...");
@@ -43,7 +58,32 @@ function WizardContent() {
 
   // Dynamic step definitions: one thing at a time with simple conversational wording
   const steps = useMemo(() => {
-    if (docType === "report") {
+    if (docType === "closing_meeting") {
+      return [
+        { id: "title", label: "What is the event title?", description: "Enter the formal title of the completed event." },
+        { id: "organizedBy", label: "Who organized this event?", description: "e.g. AI & ML Club / SDP Department" },
+        { id: "facultyCoordinator", label: "Who was the faculty coordinator?", description: "Enter the name of the faculty in charge." },
+        { id: "date", label: "What was the event date?", description: "Select the date the event took place." },
+        { id: "venue", label: "Where was it held?", description: "e.g. Seminar Hall, Computer Lab 3" },
+        { id: "timing", label: "What were the event timings & duration?", description: "e.g. Start 10:00 AM, End 4:00 PM, Duration 6 Hours" },
+        { id: "participants", label: "How many & who participated?", description: "e.g. 85 Students from TE & BE AI & ML" },
+        { id: "highlights", label: "What were key challenges or recommendations?", description: "List bullet points of challenges faced and team suggestions." },
+        { id: "rawDescription", label: "Brief summary of what happened?", description: "Mandatory: Write a summary of the meeting and event conduction." },
+        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for report generation." }
+      ];
+    } else if (docType === "project_proposal") {
+      return [
+        { id: "title", label: "What is your project title?", description: "Enter the full professional title of your proposed project." },
+        { id: "projectTrack", label: "What is the project track?", description: "e.g. Hardware Track / Software Track / AI System" },
+        { id: "senderName", label: "Who is the primary applicant?", description: "Enter your full name." },
+        { id: "teamStructure", label: "What is the team structure?", description: "e.g. Team — Arsh Pathan & Vedika Pathode (Dept of AI & ML)" },
+        { id: "techStack", label: "What is your target tech stack?", description: "e.g. Python, PyTorch, ESP32, React, OpenCV" },
+        { id: "totalFinancialRequest", label: "What is your budgetary request?", description: "e.g. ₹ 2,500 for sensors/components, or ₹ 0 for software" },
+        { id: "highlights", label: "What lab access or resources are needed?", description: "Specify 3D printing, workshop access, or special club lab assets." },
+        { id: "rawDescription", label: "Describe the project concept & architecture", description: "Mandatory: 2-3 sentences explaining what you are building and why." },
+        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for proposal drafting." }
+      ];
+    } else if (docType === "report") {
       return [
         { id: "title", label: "What is the title of the event?", description: "Enter the title manually, or let Gemini extract it from your description later." },
         { id: "date", label: "When was the event held?", description: "Select the date of the event." },
@@ -74,7 +114,6 @@ function WizardContent() {
   // Helper to check if current step input is empty
   const isCurrentFieldEmpty = useMemo(() => {
     const id = currentStep.id;
-    // rawDescription is mandatory so we do not count it as empty (which would show the "Draft with Gemini" skip option)
     if (id === "rawDescription") return false;
     
     if (id === "title") return titleChoice === "extract" ? true : title.trim() === "";
@@ -86,9 +125,16 @@ function WizardContent() {
     if (id === "senderDesignation") return senderDesignation.trim() === "";
     if (id === "highlights") return highlights.trim() === "";
     if (id === "instructions") return instructions.trim() === "";
+    if (id === "organizedBy") return organizedBy.trim() === "";
+    if (id === "facultyCoordinator") return facultyCoordinator.trim() === "";
+    if (id === "timing") return startTime.trim() === "";
+    if (id === "projectTrack") return projectTrack.trim() === "";
+    if (id === "teamStructure") return teamStructure.trim() === "";
+    if (id === "techStack") return techStack.trim() === "";
+    if (id === "totalFinancialRequest") return totalFinancialRequest.trim() === "";
     if (id === "photos") return photos.length === 0;
     return true;
-  }, [currentStep, title, titleChoice, recipient, date, venue, participants, senderName, senderDesignation, highlights, instructions, photos]);
+  }, [currentStep, title, titleChoice, recipient, date, venue, participants, senderName, senderDesignation, highlights, instructions, organizedBy, facultyCoordinator, startTime, projectTrack, teamStructure, techStack, totalFinancialRequest, photos]);
 
   const handleNextClick = () => {
     if (currentStep.id === "rawDescription" && rawDescription.trim() === "") {
@@ -157,8 +203,8 @@ function WizardContent() {
         JSON.stringify({
           title: titleChoice === "extract" ? "" : title,
           date,
-          venue: docType === "report" ? venue : "",
-          participants: docType === "report" ? participants : "",
+          venue,
+          participants,
           highlights,
           rawDescription,
           instructions,
@@ -166,8 +212,17 @@ function WizardContent() {
           docType,
           apiKey: apiKey || undefined,
           recipient: docType === "application" ? recipient : undefined,
-          senderName: docType === "application" ? senderName : undefined,
-          senderDesignation: docType === "application" ? senderDesignation : undefined,
+          senderName,
+          senderDesignation,
+          organizedBy,
+          facultyCoordinator,
+          startTime,
+          endTime,
+          duration,
+          projectTrack,
+          teamStructure,
+          techStack,
+          totalFinancialRequest,
         })
       );
       photos.forEach((p) => fd.append("photos", p.file, p.file.name));
@@ -200,10 +255,20 @@ function WizardContent() {
           advisor: SIGNATORIES.advisor,
           sdpHead: SIGNATORIES.sdpHead,
           principal: SIGNATORIES.principal,
+          technicalLead: SIGNATORIES.technicalLead,
           docType,
           recipient,
           senderName,
           senderDesignation,
+          organizedBy,
+          facultyCoordinator,
+          startTime,
+          endTime,
+          duration,
+          projectTrack,
+          teamStructure,
+          techStack,
+          totalFinancialRequest,
         })
       );
 
@@ -291,6 +356,107 @@ function WizardContent() {
                   setTitleChoice("manual");
                 }}
                 placeholder="Type title here..."
+              />
+            )}
+
+            {currentStep.id === "organizedBy" && (
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={organizedBy}
+                onChange={(e) => setOrganizedBy(e.target.value)}
+                placeholder="e.g. AI & ML Club"
+              />
+            )}
+
+            {currentStep.id === "facultyCoordinator" && (
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={facultyCoordinator}
+                onChange={(e) => setFacultyCoordinator(e.target.value)}
+                placeholder="e.g. Prof. Yugashree Pawar"
+              />
+            )}
+
+            {currentStep.id === "timing" && (
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-400">Start Time</label>
+                  <input
+                    type="text"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-400">End Time</label>
+                  <input
+                    type="text"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-400">Duration</label>
+                  <input
+                    type="text"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {currentStep.id === "projectTrack" && (
+              <select
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none"
+                value={projectTrack}
+                onChange={(e) => setProjectTrack(e.target.value)}
+              >
+                <option value="Software Track">Software Track</option>
+                <option value="Hardware Track">Hardware Track</option>
+                <option value="AI / ML System Track">AI / ML System Track</option>
+                <option value="Embedded Systems Track">Embedded Systems Track</option>
+              </select>
+            )}
+
+            {currentStep.id === "teamStructure" && (
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={teamStructure}
+                onChange={(e) => setTeamStructure(e.target.value)}
+                placeholder="e.g. Arsh Pathan & Vedika Pathode (Dept of AI & ML)"
+              />
+            )}
+
+            {currentStep.id === "techStack" && (
+              <textarea
+                rows={3}
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
+                value={techStack}
+                onChange={(e) => setTechStack(e.target.value)}
+                placeholder="e.g. Python, PyTorch, React, ESP32 microcontrollers..."
+              />
+            )}
+
+            {currentStep.id === "totalFinancialRequest" && (
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={totalFinancialRequest}
+                onChange={(e) => setTotalFinancialRequest(e.target.value)}
+                placeholder="e.g. ₹ 2,500 or ₹ 0"
               />
             )}
 

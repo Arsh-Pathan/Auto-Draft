@@ -86,7 +86,164 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
       </table>
 
       <section class="report-shell">
-        ${meta.docType === "application" ? `
+        ${meta.docType === "closing_meeting" ? `
+        <!-- Closing Meeting Report Layout -->
+        <div style="text-align: center; margin-bottom: 15pt; font-family: 'Calibri', sans-serif;">
+          <div style="font-size: 11pt; font-weight: bold; color: #333;">Sagar Dhole Patil Sir’s</div>
+          <div style="font-size: 13pt; font-weight: bold; color: #1e3a8a;">Student Development Program (SDP)</div>
+          <h1 class="title" style="margin-top: 10pt; margin-bottom: 15pt; font-size: 16pt;"><u>Closing Meeting Report</u></h1>
+        </div>
+
+        <table class="content-table" style="width: 100%; margin-bottom: 15pt; border: 1px solid #000; font-family: 'Calibri', sans-serif; font-size: 11pt;">
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt;"><strong>Event Title:</strong></td>
+              <td colspan="3" style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.title)}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt;"><strong>Organized By:</strong></td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.organizedBy || "AI & ML Club")}</td>
+              <td style="border: 1px solid #000; padding: 6pt;"><strong>Date / Venue:</strong></td>
+              <td style="border: 1px solid #000; padding: 6pt;">${formatDateShort(meta.date)} | ${escapeHtml(meta.venue || "Seminar Hall")}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt;"><strong>Faculty Coordinator:</strong></td>
+              <td colspan="3" style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.facultyCoordinator || "Department Faculty")}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt;"><strong>Event Timing & Duration:</strong></td>
+              <td colspan="3" style="border: 1px solid #000; padding: 6pt;">
+                Start: ${escapeHtml(meta.startTime || "10:00 AM")} | End: ${escapeHtml(meta.endTime || "04:00 PM")} | Duration: ${escapeHtml(meta.duration || "6 Hours")} | Participants: ${escapeHtml(meta.participants || "N/A")}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        ${sectionsHtml}
+
+        <div style="margin-top: 40pt; margin-bottom: 40pt; border-top: 2px dashed #ccc; padding-top: 20pt; page-break-before: auto;">
+          <h2 style="text-align: center; font-size: 14pt; font-weight: bold; margin-bottom: 15pt; font-family: 'Calibri', sans-serif;"><u>Closing Meeting Attendance</u></h2>
+          <table class="content-table" style="width: 100%; border-collapse: collapse; font-family: 'Calibri', sans-serif; font-size: 10.5pt;">
+            <thead>
+              <tr style="background-color: #f3f4f6;">
+                <th style="border: 1px solid #000; padding: 6pt; width: 10%;">Sr. No</th>
+                <th style="border: 1px solid #000; padding: 6pt; width: 45%;">Name of Faculty / Member</th>
+                <th style="border: 1px solid #000; padding: 6pt; width: 25%;">Designation</th>
+                <th style="border: 1px solid #000; padding: 6pt; width: 20%;">Signature</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6pt; text-align: center;">1</td>
+                <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(signatories.advisor)}</td>
+                <td style="border: 1px solid #000; padding: 6pt;">Club Advisor</td>
+                <td style="border: 1px solid #000; padding: 6pt;"></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6pt; text-align: center;">2</td>
+                <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(signatories.sdpHead)}</td>
+                <td style="border: 1px solid #000; padding: 6pt;">Head - SDP</td>
+                <td style="border: 1px solid #000; padding: 6pt;"></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6pt; text-align: center;">3</td>
+                <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.facultyCoordinator || "Faculty Coordinator")}</td>
+                <td style="border: 1px solid #000; padding: 6pt;">Faculty Coordinator</td>
+                <td style="border: 1px solid #000; padding: 6pt;"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <section class="signatures" style="margin-top: 60pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
+          <div class="sig-col" style="display: table-cell; width: 50%; text-align: center;">
+            <strong>Event Coordinator</strong><br/>
+            ${escapeHtml(meta.eventCoordinator || signatories.eventCoordinator || "Event Coordinator")}
+          </div>
+          <div class="sig-col" style="display: table-cell; width: 50%; text-align: center;">
+            <strong>Head - SDP</strong><br/>
+            ${escapeHtml(signatories.sdpHead)}
+          </div>
+        </section>
+        ` : meta.docType === "project_proposal" ? `
+        <!-- Project Proposal Form Layout -->
+        <h1 class="title" style="text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 20pt; font-family: 'Calibri', sans-serif;">
+          <u>PROJECT PROPOSAL FORM</u>
+        </h1>
+
+        <div style="margin-bottom: 15pt; font-size: 11pt; line-height: 1.5; font-family: 'Calibri', sans-serif;">
+          <strong>To,</strong><br/>
+          The Club Advisor,<br/>
+          AI &amp; ML Club,<br/>
+          Dhole Patil College of Engineering, Pune
+        </div>
+
+        <div style="margin-bottom: 15pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
+          <strong>Subject:</strong> <u>Proposal for AI &amp; ML Club Project Approval: ${escapeHtml(meta.title || "Project Approval Request")}</u>
+        </div>
+
+        <div style="margin-bottom: 12pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
+          Respected Madam,
+        </div>
+
+        <p style="font-size: 11pt; line-height: 1.5; text-align: justify; margin-bottom: 20pt; font-family: 'Calibri', sans-serif;">
+          I am writing to formally apply for a project slot in the upcoming AI &amp; ML Club project sprint. I propose to develop an advanced <strong>${escapeHtml(meta.projectTrack || "Software / Hardware")}</strong> system, titled <strong>"${escapeHtml(meta.title)}"</strong>. This application details the concept, required resources, infrastructure access, and technical support requested for successful completion within our strict 30-day timeline.
+        </p>
+
+        <table class="content-table" style="width: 100%; margin-bottom: 20pt; border: 1px solid #000; font-family: 'Calibri', sans-serif; font-size: 11pt;">
+          <tbody>
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold; width: 30%;">Project Track:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.projectTrack || "Software / Hardware")}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Team Structure:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.teamStructure || "AI & ML Club Member")}</td>
+            </tr>
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Tech Stack:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.techStack || "Python, PyTorch, React, Next.js")}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Financial Request:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.totalFinancialRequest || "₹ 0 (Self-funded / Software)")}</td>
+            </tr>
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">30-Day Sprint Commitment:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.sprintAgreement || "Yes - Fully Committed")}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        ${sectionsHtml}
+
+        <p style="font-size: 11pt; line-height: 1.5; text-align: justify; margin-top: 20pt; margin-bottom: 25pt; font-family: 'Calibri', sans-serif;">
+          I am confident that this project aligns well with the club's objectives and will provide a valuable learning and demonstration tool for the AI &amp; ML community at Dhole Patil College of Engineering. Thank you for considering our application.
+        </p>
+
+        <div style="margin-bottom: 40pt; font-size: 11pt; text-align: right; font-family: 'Calibri', sans-serif; float: right; width: 280px;">
+          Yours faithfully,<br/><br/>
+          <strong>${escapeHtml(meta.senderName || "Applicant")}</strong><br/>
+          Member, AI &amp; ML Club<br/>
+          Date: ${formatDateShort(meta.date)}
+        </div>
+        <div style="clear: both;"></div>
+
+        <section class="signatures" style="margin-top: 60pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
+          <div class="sig-col" style="display: table-cell; width: 33.33%; text-align: center;">
+            <strong>Technical Lead</strong><br/>
+            ${escapeHtml(signatories.technicalLead || "Mr. Arsh Pathan / Miss. Vedika Pathode")}
+          </div>
+          <div class="sig-col" style="display: table-cell; width: 33.33%; text-align: center;">
+            <strong>Club Advisor</strong><br/>
+            ${escapeHtml(signatories.advisor)}
+          </div>
+          <div class="sig-col" style="display: table-cell; width: 33.33%; text-align: center;">
+            <strong>SDP Head</strong><br/>
+            ${escapeHtml(signatories.sdpHead)}
+          </div>
+        </section>
+        ` : meta.docType === "application" ? `
         <!-- Application Letter Layout -->
         <div style="text-align: right; margin-bottom: 15pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
           <strong>Date:</strong> ${formatDateShort(meta.date)}
@@ -143,6 +300,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         ${sectionsHtml}
         `}
 
+        ${meta.docType !== "closing_meeting" && meta.docType !== "project_proposal" ? `
         <section class="signatures" style="margin-top: ${meta.docType === "application" ? "80pt" : "180pt"}; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
           <div class="sig-col" style="display: table-cell; width: 33.33%;">
             <strong>Club Advisor</strong><br/>
@@ -157,6 +315,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
             ${escapeHtml(signatories.principal)}
           </div>
         </section>
+        ` : ""}
       </section>
     </div>
   </main>
