@@ -42,6 +42,12 @@ function WizardContent() {
   const [teamStructure, setTeamStructure] = useState("");
   const [techStack, setTechStack] = useState("");
   const [totalFinancialRequest, setTotalFinancialRequest] = useState("₹ 0 (Self-funded / Software)");
+  const [hardwareSourcing, setHardwareSourcing] = useState("Innovation Lab Stock / Local Vendors");
+  const [labAccess, setLabAccess] = useState("3D Printing Workshop & Circuit Testing");
+  const [architectureLink, setArchitectureLink] = useState("");
+  const [sensorDiagramLink, setSensorDiagramLink] = useState("");
+  const [videoLinks, setVideoLinks] = useState("");
+  const [paperLinks, setPaperLinks] = useState("");
 
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +62,7 @@ function WizardContent() {
     }
   }, []);
 
-  // Dynamic step definitions: one thing at a time with simple conversational wording
+  // Dynamic step definitions: comprehensive and tailored per document type
   const steps = useMemo(() => {
     if (docType === "closing_meeting") {
       return [
@@ -68,6 +74,7 @@ function WizardContent() {
         { id: "timing", label: "What were the event timings & duration?", description: "e.g. Start 10:00 AM, End 4:00 PM, Duration 6 Hours" },
         { id: "participants", label: "How many & who participated?", description: "e.g. 85 Students from TE & BE AI & ML" },
         { id: "highlights", label: "What were key challenges or recommendations?", description: "List bullet points of challenges faced and team suggestions." },
+        { id: "photos", label: "Upload event & meeting photos", description: "Upload photographs taken during the session." },
         { id: "rawDescription", label: "Brief summary of what happened?", description: "Mandatory: Write a summary of the meeting and event conduction." },
         { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for report generation." }
       ];
@@ -75,11 +82,13 @@ function WizardContent() {
       return [
         { id: "title", label: "What is your project title?", description: "Enter the full professional title of your proposed project." },
         { id: "projectTrack", label: "What is the project track?", description: "e.g. Hardware Track / Software Track / AI System" },
-        { id: "senderName", label: "Who is the primary applicant?", description: "Enter your full name." },
-        { id: "teamStructure", label: "What is the team structure?", description: "e.g. Team — Arsh Pathan & Vedika Pathode (Dept of AI & ML)" },
-        { id: "techStack", label: "What is your target tech stack?", description: "e.g. Python, PyTorch, ESP32, React, OpenCV" },
+        { id: "senderName", label: "Who is the primary applicant & lead?", description: "Enter your full name." },
+        { id: "teamStructure", label: "What is the team structure?", description: "e.g. Arsh Pathan & Vedika Pathode (Dept of AI & ML)" },
+        { id: "techStack", label: "What target tech stack & sensors are used?", description: "e.g. Python, PyTorch, ESP32 microcontrollers, OpenCV" },
         { id: "totalFinancialRequest", label: "What is your budgetary request?", description: "e.g. ₹ 2,500 for sensors/components, or ₹ 0 for software" },
-        { id: "highlights", label: "What lab access or resources are needed?", description: "Specify 3D printing, workshop access, or special club lab assets." },
+        { id: "hardwareSourcing", label: "What is your hardware sourcing strategy?", description: "e.g. Innovation Lab Stock / Local Vendors / Self-funded" },
+        { id: "labAccess", label: "What lab access or 3D printing is required?", description: "e.g. 3D printing enclosure slot, PCB soldering station" },
+        { id: "referenceLinks", label: "Provide reference links & diagrams", description: "Links to Architecture Blueprint, Sensor Pinouts, Video Demos & Papers." },
         { id: "rawDescription", label: "Describe the project concept & architecture", description: "Mandatory: 2-3 sentences explaining what you are building and why." },
         { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for proposal drafting." }
       ];
@@ -90,9 +99,9 @@ function WizardContent() {
         { id: "venue", label: "Where did it take place?", description: "e.g. Seminar Hall, A-Block, Computer Lab" },
         { id: "participants", label: "Who attended the event?", description: "e.g. BE students, department faculty, guest speakers" },
         { id: "highlights", label: "What were the key highlights?", description: "List some quick bullet points or takeaways." },
+        { id: "photos", label: "Upload event photos", description: "Upload event photographs with optional captions." },
         { id: "rawDescription", label: "Roughly what happened?", description: "Mandatory: Write in simple words what happened from start to finish." },
-        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it concise, highlight the guest speaker's speech." },
-        { id: "photos", label: "Upload event photos", description: "Optional: Drag and drop event photographs." }
+        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it concise, highlight the guest speaker's speech." }
       ];
     } else {
       return [
@@ -269,6 +278,12 @@ function WizardContent() {
           teamStructure,
           techStack,
           totalFinancialRequest,
+          hardwareSourcing,
+          labAccess,
+          architectureLink,
+          sensorDiagramLink,
+          videoLinks,
+          paperLinks,
         })
       );
 
@@ -458,6 +473,73 @@ function WizardContent() {
                 onChange={(e) => setTotalFinancialRequest(e.target.value)}
                 placeholder="e.g. ₹ 2,500 or ₹ 0"
               />
+            )}
+
+            {currentStep.id === "hardwareSourcing" && (
+              <input
+                type="text"
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-3 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
+                value={hardwareSourcing}
+                onChange={(e) => setHardwareSourcing(e.target.value)}
+                placeholder="e.g. Innovation Lab Stock / Local Vendors / Self-funded"
+              />
+            )}
+
+            {currentStep.id === "labAccess" && (
+              <textarea
+                rows={3}
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
+                value={labAccess}
+                onChange={(e) => setLabAccess(e.target.value)}
+                placeholder="e.g. 3D printing enclosure slot, PCB soldering station..."
+              />
+            )}
+
+            {currentStep.id === "referenceLinks" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Architecture Blueprint / Diagram Link</label>
+                  <input
+                    type="url"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
+                    value={architectureLink}
+                    onChange={(e) => setArchitectureLink(e.target.value)}
+                    placeholder="https://raw.githubusercontent.com/.../architecture.png"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Sensor Pinout / Schematic Link</label>
+                  <input
+                    type="url"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
+                    value={sensorDiagramLink}
+                    onChange={(e) => setSensorDiagramLink(e.target.value)}
+                    placeholder="https://raw.githubusercontent.com/.../schematic.png"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Video Demo / Implementation Link</label>
+                  <input
+                    type="url"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
+                    value={videoLinks}
+                    onChange={(e) => setVideoLinks(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=..."
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Academic Paper / IEEE Reference Link</label>
+                  <input
+                    type="url"
+                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
+                    value={paperLinks}
+                    onChange={(e) => setPaperLinks(e.target.value)}
+                    placeholder="https://arxiv.org/abs/..."
+                  />
+                </div>
+              </div>
             )}
 
             {currentStep.id === "recipient" && (

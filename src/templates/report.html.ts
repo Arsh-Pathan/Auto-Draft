@@ -208,6 +208,42 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
               <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Financial Request:</td>
               <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.totalFinancialRequest || "₹ 0 (Self-funded / Software)")}</td>
             </tr>
+            ${meta.hardwareSourcing ? `
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Hardware Sourcing:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.hardwareSourcing)}</td>
+            </tr>
+            ` : ""}
+            ${meta.labAccess ? `
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Lab &amp; Workshop Access:</td>
+              <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.labAccess)}</td>
+            </tr>
+            ` : ""}
+            ${meta.architectureLink ? `
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Architecture Diagram:</td>
+              <td style="border: 1px solid #000; padding: 6pt;"><a href="${escapeHtml(meta.architectureLink)}" target="_blank" style="color: #2563eb; text-decoration: underline;">${escapeHtml(meta.architectureLink)}</a></td>
+            </tr>
+            ` : ""}
+            ${meta.sensorDiagramLink ? `
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Sensor Pinout Diagram:</td>
+              <td style="border: 1px solid #000; padding: 6pt;"><a href="${escapeHtml(meta.sensorDiagramLink)}" target="_blank" style="color: #2563eb; text-decoration: underline;">${escapeHtml(meta.sensorDiagramLink)}</a></td>
+            </tr>
+            ` : ""}
+            ${meta.videoLinks ? `
+            <tr style="background-color: #f8fafc;">
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Video Implementation Link:</td>
+              <td style="border: 1px solid #000; padding: 6pt;"><a href="${escapeHtml(meta.videoLinks)}" target="_blank" style="color: #2563eb; text-decoration: underline;">${escapeHtml(meta.videoLinks)}</a></td>
+            </tr>
+            ` : ""}
+            ${meta.paperLinks ? `
+            <tr>
+              <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">Academic Reference Link:</td>
+              <td style="border: 1px solid #000; padding: 6pt;"><a href="${escapeHtml(meta.paperLinks)}" target="_blank" style="color: #2563eb; text-decoration: underline;">${escapeHtml(meta.paperLinks)}</a></td>
+            </tr>
+            ` : ""}
             <tr style="background-color: #f8fafc;">
               <td style="border: 1px solid #000; padding: 6pt; font-weight: bold;">30-Day Sprint Commitment:</td>
               <td style="border: 1px solid #000; padding: 6pt;">${escapeHtml(meta.sprintAgreement || "Yes - Fully Committed")}</td>

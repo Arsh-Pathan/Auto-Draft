@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from "react";
 import { Field } from "@/components/ui/Field";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
@@ -44,8 +45,39 @@ export function ReportForm({
   const isQuotaError = error?.includes("QUOTA_EXCEEDED") || error?.includes("GEMINI_API_KEY");
   const displayError = isQuotaError ? "The server's Google Gemini API key is missing or the quota has been exceeded." : error;
 
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    try {
+      localStorage.setItem("auto_draft_form_state", JSON.stringify(form));
+      localStorage.setItem("auto_draft_ai_state", JSON.stringify(ai));
+      const photoPromises = photos.map(async (p) => ({
+        id: p.id,
+        name: p.file.name,
+        type: p.file.type,
+        dataUrl: p.dataUrl,
+        caption: p.caption,
+      }));
+      const serialized = await Promise.all(photoPromises);
+      localStorage.setItem("auto_draft_photos", JSON.stringify(serialized));
+      setSaveStatus("Saved locally!");
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (e) {
+      console.error(e);
+      setSaveStatus("Failed to save draft");
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
+  };
+
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+      {/* Save Status Notification */}
+      {saveStatus && (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-800 flex items-center justify-between animate-fade-in">
+          <span>{saveStatus}</span>
+          <span className="text-emerald-600 font-normal">All changes persisted</span>
+        </div>
+      )}
 
       {form.docType === "closing_meeting" ? (
         <fieldset className="space-y-4">
@@ -158,13 +190,45 @@ export function ReportForm({
             onChange={update("totalFinancialRequest")}
             placeholder="₹ 2,500 or ₹ 0"
           />
-          <TextArea
-            label="Resource & Lab Access Requests (rough notes)"
-            rows={3}
-            value={form.highlights}
-            onChange={update("highlights")}
-            placeholder="e.g. 3D printing slot in innovation lab, off-class hours AI lab access"
+          <Field
+            label="Hardware & Component Sourcing Strategy"
+            value={form.hardwareSourcing || ""}
+            onChange={update("hardwareSourcing")}
+            placeholder="e.g. Innovation Lab Stock / Local Vendors / Self-funded"
           />
+          <Field
+            label="Laboratory Access & 3D Printing Requirements"
+            value={form.labAccess || ""}
+            onChange={update("labAccess")}
+            placeholder="e.g. 3D printing enclosure slot, PCB soldering station"
+          />
+          <div className="space-y-3 pt-2 border-t border-gray-200">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">Reference Links & Technical Diagrams</h4>
+            <Field
+              label="System Architecture Blueprint Link"
+              value={form.architectureLink || ""}
+              onChange={update("architectureLink")}
+              placeholder="https://..."
+            />
+            <Field
+              label="Sensor Pinout / Schematic Diagram Link"
+              value={form.sensorDiagramLink || ""}
+              onChange={update("sensorDiagramLink")}
+              placeholder="https://..."
+            />
+            <Field
+              label="Video Implementation / Demo Link"
+              value={form.videoLinks || ""}
+              onChange={update("videoLinks")}
+              placeholder="https://youtube.com/..."
+            />
+            <Field
+              label="Academic Paper / Research Documentation Link"
+              value={form.paperLinks || ""}
+              onChange={update("paperLinks")}
+              placeholder="https://arxiv.org/..."
+            />
+          </div>
           <div className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Project Concept & Problem Statement</label>
@@ -383,6 +447,12 @@ export function ReportForm({
       )}
 
       <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Save Draft
+        </Button>
         <Button type="button" onClick={onGenerate} disabled={busy.generating}>
           {busy.generating ? "Generating..." : "Generate with Gemini"}
         </Button>

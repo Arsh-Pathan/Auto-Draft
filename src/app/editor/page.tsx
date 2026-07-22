@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ReportForm } from "@/frontend/ReportForm";
 import { LivePreview } from "@/frontend/LivePreview";
+import { AIChatAssistant } from "@/frontend/AIChatAssistant";
 import type { LocalPhoto } from "@/frontend/ImageDropzone";
 import type { FormState, ReportData, ReportPayload } from "@/types/report";
 import { COLLEGE_NAME, REPORT_DEFAULTS, SIGNATORIES } from "@/utils/constants";
@@ -333,6 +334,12 @@ function EditorContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm lg:col-span-5">
+          <AIChatAssistant
+            form={form}
+            setForm={setForm}
+            setAi={setAi}
+            apiKey={apiKey}
+          />
           <ReportForm
             form={form}
             setForm={setForm}
