@@ -57,7 +57,7 @@ export default function LandingMenu() {
                 alt="AI & ML Club DPES Logo"
                 width={50}
                 height={50}
-                className="h-10 w-10 shrink-0 rounded-full border border-blue-600 shadow-sm"
+                className="h-10 w-10 shrink-0 rounded-full shadow-sm"
               />
               <div className="hidden md:block">
                 <span className="text-xs font-bold uppercase tracking-wider text-blue-600 block">
@@ -94,10 +94,6 @@ export default function LandingMenu() {
       <main className="flex-1 max-w-7xl mx-auto px-6 py-10 w-full space-y-12">
         <section className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden">
           <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-300">
-              <span className="h-2 w-2 rounded-full bg-blue-400" />
-              Official Document Generator · Dhole Patil College of Engineering
-            </div>
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
               AutoDraft &amp; Activity Report Portal
             </h1>
@@ -126,16 +122,14 @@ export default function LandingMenu() {
             </div>
           </div>
 
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center">
-            <div className="relative p-3 rounded-full bg-blue-500/10 border border-blue-400/30 backdrop-blur-md shadow-2xl">
-              <Image
-                src="/club-logo.png"
-                alt="AI ML Club Seal"
-                width={220}
-                height={220}
-                className="h-52 w-52 rounded-full object-cover shadow-inner"
-              />
-            </div>
+          <div className="absolute right-10 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center">
+            <Image
+              src="/club-logo.png"
+              alt="AI ML Club Logo"
+              width={240}
+              height={240}
+              className="h-56 w-56 rounded-full object-cover shadow-2xl"
+            />
           </div>
         </section>
 
