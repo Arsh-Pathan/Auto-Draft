@@ -102,7 +102,7 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
           </div>
           <div className="mt-2 h-1.5 w-full rounded-full bg-gray-100">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
+              className="h-full rounded-full bg-blue-600 transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
             />
           </div>
