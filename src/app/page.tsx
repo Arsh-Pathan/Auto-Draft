@@ -108,17 +108,17 @@ export default function LandingMenu() {
             <div className="pt-4 flex flex-wrap gap-4">
               <a
                 href="#templates"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-900 hover:bg-blue-50 font-bold text-sm rounded-xl shadow-lg transition-all hover:scale-[1.03]"
               >
                 Create New Document
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </a>
               {hasSavedDraft && (
                 <Link
                   href="/editor"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:scale-[1.03]"
                 >
                   Resume Saved Draft
                 </Link>
@@ -126,14 +126,16 @@ export default function LandingMenu() {
             </div>
           </div>
 
-          <div className="absolute right-6 bottom-6 opacity-10 pointer-events-none hidden lg:block">
-            <Image
-              src="/club-logo.png"
-              alt="Background Seal"
-              width={300}
-              height={300}
-              className="h-72 w-72"
-            />
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center">
+            <div className="relative p-3 rounded-full bg-blue-500/10 border border-blue-400/30 backdrop-blur-md shadow-2xl">
+              <Image
+                src="/club-logo.png"
+                alt="AI ML Club Seal"
+                width={220}
+                height={220}
+                className="h-52 w-52 rounded-full object-cover shadow-inner"
+              />
+            </div>
           </div>
         </section>
 
