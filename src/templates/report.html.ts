@@ -32,12 +32,12 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
   const assetBaseUrl = normalizeAssetBaseUrl(options.assetBaseUrl);
 
 
-  const sectionsHtml = ai.sections.map((sec, idx) => {
+  const sectionsHtml = ai.sections.map((sec) => {
     let content = "";
     if (sec.type === "text") {
-      content = `<p data-sec-id="${sec.id}" data-sec-field="text" contenteditable="true" style="outline:none;">${escapeHtml(sec.text || "")}</p>`;
+      content = `<p class="typewriter-target" data-sec-id="${sec.id}" data-sec-field="text" contenteditable="true" style="outline:none;">${escapeHtml(sec.text || "")}</p>`;
     } else if (sec.type === "bullets") {
-      content = `<ul class="bullets" data-sec-id="${sec.id}" data-sec-field="bullets" contenteditable="true" style="outline:none;">${(sec.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`;
+      content = `<ul class="bullets" data-sec-id="${sec.id}" data-sec-field="bullets" contenteditable="true" style="outline:none;">${(sec.bullets || []).map(b => `<li class="typewriter-target">${escapeHtml(b)}</li>`).join("")}</ul>`;
     } else if (sec.type === "table") {
       content = `<table class="content-table" data-sec-id="${sec.id}" data-sec-field="table" contenteditable="true" style="outline:none;"><tbody>${(sec.table || []).map(row => 
         `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
@@ -53,7 +53,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
     }
 
     return `
-      <section class="ai-section section-animate" style="animation-delay: ${(idx * 0.1).toFixed(2)}s;">
+      <section class="ai-section">
         ${sec.heading ? `<h2 class="section" data-sec-id="${sec.id}" data-sec-field="heading" contenteditable="true" style="outline:none;">${escapeHtml(sec.heading)}</h2>` : ""}
         ${content}
       </section>
@@ -399,6 +399,51 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
       else if (field === 'table') value = Array.from(target.querySelectorAll('tr')).map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.innerText));
       clearTimeout(_t);
       _t = setTimeout(() => window.parent.postMessage({ type: 'PREVIEW_EDIT', id, field, value }, '*'), 500);
+    });
+
+    // AI Diffusion Scramble-Decode Animation
+    document.addEventListener('DOMContentLoaded', () => {
+      const glyphs = '░▒▓█<>/\\_+-*!?#@$%&~≈±≡§01';
+      const targets = document.querySelectorAll('.typewriter-target');
+      
+      targets.forEach((el, index) => {
+        const fullText = el.innerText;
+        if (!fullText || fullText.trim().length === 0) return;
+        
+        el.classList.add('diffusing-active');
+        
+        setTimeout(() => {
+          let iteration = 0;
+          const totalSteps = Math.min(35, Math.max(12, fullText.length));
+          const stepInterval = Math.max(15, Math.floor(800 / totalSteps));
+          
+          const timer = setInterval(() => {
+            let currentStr = '';
+            const revealedLength = Math.floor((iteration / totalSteps) * fullText.length);
+            
+            for (let i = 0; i < fullText.length; i++) {
+              const char = fullText[i];
+              if (char === ' ' || char === '\n' || char === '\t') {
+                currentStr += char;
+              } else if (i < revealedLength) {
+                currentStr += char;
+              } else {
+                currentStr += glyphs[Math.floor(Math.random() * glyphs.length)];
+              }
+            }
+            
+            el.innerText = currentStr;
+            iteration++;
+            
+            if (iteration > totalSteps) {
+              clearInterval(timer);
+              el.innerText = fullText;
+              el.classList.remove('diffusing-active');
+              el.classList.add('diffused-complete');
+            }
+          }, stepInterval);
+        }, index * 120);
+      });
     });
   </script>
 </body>

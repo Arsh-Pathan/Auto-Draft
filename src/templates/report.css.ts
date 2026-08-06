@@ -36,6 +36,17 @@ export const REPORT_CSS = `
     }
   }
 
+  @keyframes glowDiffuse {
+    0% {
+      color: #2563eb;
+      text-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+    }
+    100% {
+      color: #000;
+      text-shadow: none;
+    }
+  }
+
   @media screen {
     html, body {
       background: #ffffff;
@@ -50,10 +61,13 @@ export const REPORT_CSS = `
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
       transition: all 0.3s ease;
     }
-    .section-animate {
-      animation: docSectionAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both, writingHighlight 1.8s ease-out both;
-      border-radius: 4px;
-      padding: 2px 4px;
+    .diffusing-active {
+      color: #2563eb !important;
+      font-family: monospace, sans-serif !important;
+      letter-spacing: 0.5px;
+    }
+    .diffused-complete {
+      animation: glowDiffuse 0.8s ease-out forwards;
     }
     .report::after {
       content: "";
