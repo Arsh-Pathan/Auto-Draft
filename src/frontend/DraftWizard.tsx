@@ -114,7 +114,7 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                📄 Activity Report
+                Activity Report
               </button>
               <button
                 type="button"
@@ -125,7 +125,7 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                ✉️ Official Application
+                Official Application
               </button>
             </div>
           </div>

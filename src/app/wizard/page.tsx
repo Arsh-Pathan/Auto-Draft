@@ -261,10 +261,10 @@ function WizardContent() {
         {/* Document Type Selector Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { id: "report", label: "Activity Report", icon: "📄", desc: "Events & Workshops" },
-            { id: "application", label: "Official Application", icon: "✉️", desc: "Leave & Permissions" },
-            { id: "closing_meeting", label: "Closing Meeting", icon: "🤝", desc: "Event Post-Mortem" },
-            { id: "project_proposal", label: "Project Proposal", icon: "💡", desc: "Hardware & Tech Stack" },
+            { id: "report", label: "Activity Report", desc: "Events & Workshops" },
+            { id: "application", label: "Official Application", desc: "Leave & Permissions" },
+            { id: "closing_meeting", label: "Closing Meeting", desc: "Event Post-Mortem" },
+            { id: "project_proposal", label: "Project Proposal", desc: "Hardware & Tech Stack" },
           ].map((item) => (
             <button
               key={item.id}
@@ -276,10 +276,9 @@ function WizardContent() {
                   : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50/50"
               }`}
             >
-              <div className="text-2xl mb-2">{item.icon}</div>
               <div>
                 <div className="font-bold text-sm leading-tight">{item.label}</div>
-                <div className={`text-xs mt-0.5 ${docType === item.id ? "text-blue-100" : "text-gray-400"}`}>{item.desc}</div>
+                <div className={`text-xs mt-1 ${docType === item.id ? "text-blue-100" : "text-gray-400"}`}>{item.desc}</div>
               </div>
             </button>
           ))}
@@ -292,7 +291,7 @@ function WizardContent() {
           {docType === "application" ? (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
-                <span>✉️</span> Application Header Details
+                Application Header Details
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -357,7 +356,7 @@ function WizardContent() {
           ) : docType === "closing_meeting" ? (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
-                <span>🤝</span> Closing Meeting Details
+                Closing Meeting Details
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -463,7 +462,7 @@ function WizardContent() {
           ) : docType === "project_proposal" ? (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
-                <span>💡</span> Project Proposal Specifications
+                Project Proposal Specifications
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -609,7 +608,7 @@ function WizardContent() {
           ) : (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
-                <span>📄</span> Activity Report Details
+                Activity Report Details
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -635,7 +634,7 @@ function WizardContent() {
                           : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                       }`}
                     >
-                      {titleChoice === "extract" ? "✓ Gemini Auto-Generate Title" : "Auto-Generate with Gemini"}
+                      {titleChoice === "extract" ? "Gemini Auto-Generate Title" : "Auto-Generate with Gemini"}
                     </button>
                   </div>
                   <input
@@ -689,7 +688,7 @@ function WizardContent() {
           {/* COMMON NARRATIVE & ROUGH NOTES SECTION */}
           <div className="space-y-4 pt-4 border-t border-gray-100">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span>✍️</span> Description & Rough Notes
+              Description & Rough Notes
             </h2>
 
             <div>
@@ -733,7 +732,7 @@ function WizardContent() {
           {docType !== "application" && (
             <div className="space-y-3 pt-4 border-t border-gray-100">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span>📷</span> Event Photographs (Optional)
+                Event Photographs (Optional)
               </h2>
               <ImageDropzone
                 photos={photos}
@@ -759,7 +758,7 @@ function WizardContent() {
               type="submit"
               className="px-8 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-md hover:bg-blue-700 transition-all hover:scale-[1.01] flex items-center gap-2"
             >
-              <span>✨ Generate & Draft with Gemini</span>
+              Generate & Draft with Gemini
             </button>
           </div>
         </form>
