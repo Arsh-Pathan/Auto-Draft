@@ -275,22 +275,6 @@ export function ReportForm({
               placeholder="e.g. Arsh Pathan"
             />
           </div>
-          <Field
-            label="Sender Designation / Roll No"
-            value={form.senderDesignation || ""}
-            onChange={update("senderDesignation")}
-            placeholder="e.g. President, AI & ML Club / TE student"
-          />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Addressed To (Recipient)</label>
-            <textarea
-              className="w-full rounded border px-3 py-2 text-sm border-gray-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={3}
-              value={form.recipient || ""}
-              onChange={(e) => setForm({ ...form, recipient: e.target.value })}
-              placeholder="e.g. The Principal,&#10;Dhole Patil College of Engineering,&#10;Pune."
-            />
-          </div>
           <TextArea
             label="Highlights (rough notes)"
             rows={2}

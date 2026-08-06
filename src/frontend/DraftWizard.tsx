@@ -39,9 +39,9 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
   });
   const [venue, setVenue] = useState("");
   const [participants, setParticipants] = useState("");
-  const [recipient, setRecipient] = useState("The Principal,\nDhole Patil College of Engineering,\nPune.");
-  const [senderName, setSenderName] = useState("");
-  const [senderDesignation, setSenderDesignation] = useState("Student, Department of AI & ML");
+  const recipient = "The Principal,\nDhole Patil College of Engineering,\nPune.";
+  const senderName = "";
+  const senderDesignation = "Student, Department of AI & ML";
   const [rawDescription, setRawDescription] = useState("");
   const [highlights, setHighlights] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -167,27 +167,6 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Sender Designation</label>
-                <input
-                  type="text"
-                  value={senderDesignation}
-                  onChange={(e) => setSenderDesignation(e.target.value)}
-                  placeholder="e.g. Student, Department of AI & ML"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Addressed To (Recipient)</label>
-                <textarea
-                  rows={2}
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  placeholder="e.g. The Principal, DPCOE, Pune"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
             </div>
           ) : (
             <div className="space-y-4">
