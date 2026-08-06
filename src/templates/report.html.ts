@@ -285,9 +285,14 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
           APPLICATION
         </h1>
         
-        <div style="margin-bottom: 20pt; font-size: 11.5pt; line-height: 1.5; font-family: 'Calibri', sans-serif;">
-          <strong>To,</strong><br/>
-          ${meta.recipient ? escapeHtml(meta.recipient).replace(/\n/g, '<br/>') : "The Respected Principal,<br/>Dhole Patil College of Engineering, Pune."}
+        <div style="display: table; width: 100%; margin-bottom: 20pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif; table-layout: fixed;">
+          <div style="display: table-cell; width: 65%; vertical-align: top; line-height: 1.5;">
+            <strong>To,</strong><br/>
+            ${meta.recipient ? escapeHtml(meta.recipient).replace(/\n/g, '<br/>') : "The Respected Principal,<br/>Dhole Patil College of Engineering, Pune."}
+          </div>
+          <div style="display: table-cell; width: 35%; text-align: right; vertical-align: top;">
+            <strong>Date:</strong> ${meta.date ? formatDateShort(meta.date) : "______________"}
+          </div>
         </div>
         
         <div style="margin-bottom: 20pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif;">
@@ -295,7 +300,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         </div>
         
         <div style="margin-bottom: 14pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif;">
-          <strong>Respected Sir,</strong>
+          <strong>Respected Sir/Madam,</strong>
         </div>
         
         <div class="application-body" style="font-size: 12pt; line-height: 1.5; text-align: justify; margin-bottom: 30pt; font-family: 'Calibri', sans-serif;">
@@ -310,10 +315,15 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         </div>
         
         <div class="signatures" style="margin-top: 60pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed; font-family: 'Calibri', sans-serif; font-size: 11pt;">
-          <div style="display: table-cell; width: 50%; text-align: left; vertical-align: bottom;">
-            <strong>Date:</strong> ${meta.date ? formatDateShort(meta.date) : "______________"}
+          <div style="display: table-cell; width: 33.33%; text-align: left; vertical-align: bottom;">
+            <strong>Club Advisor</strong><br/>
+            ${escapeHtml(signatories.advisor || "Prof. Yugashree Pawar")}
           </div>
-          <div style="display: table-cell; width: 50%; text-align: right; vertical-align: bottom;">
+          <div style="display: table-cell; width: 33.33%; text-align: center; vertical-align: bottom;">
+            <strong>SDP Head</strong><br/>
+            ${escapeHtml(signatories.sdpHead || "Head - SDP")}
+          </div>
+          <div style="display: table-cell; width: 33.33%; text-align: right; vertical-align: bottom;">
             <strong>Principal Sir</strong><br/>
             ${escapeHtml(signatories.principal || "Prof. Abhijit Dandavate")}
           </div>

@@ -227,9 +227,29 @@ function EditorContent() {
       }
       const generatedAi = json.data as ReportData;
       setAi(generatedAi);
+
+      const newForm = { ...form };
       if (generatedAi.generatedTitle) {
-        setForm({ ...form, title: generatedAi.generatedTitle });
+        newForm.title = generatedAi.generatedTitle;
       }
+      if (generatedAi.extractedMetadata) {
+        const meta = generatedAi.extractedMetadata;
+        if (meta.recipient) newForm.recipient = meta.recipient;
+        if (meta.senderName) newForm.senderName = meta.senderName;
+        if (meta.senderDesignation) newForm.senderDesignation = meta.senderDesignation;
+        if (meta.date) newForm.date = meta.date;
+        if (meta.advisor) newForm.advisor = meta.advisor;
+        if (meta.sdpHead) newForm.sdpHead = meta.sdpHead;
+        if (meta.principal) newForm.principal = meta.principal;
+        if (meta.eventCoordinator) newForm.eventCoordinator = meta.eventCoordinator;
+        if (meta.technicalLead) newForm.technicalLead = meta.technicalLead;
+        if (meta.organizedBy) newForm.organizedBy = meta.organizedBy;
+        if (meta.facultyCoordinator) newForm.facultyCoordinator = meta.facultyCoordinator;
+        if (meta.projectTrack) newForm.projectTrack = meta.projectTrack;
+        if (meta.teamStructure) newForm.teamStructure = meta.teamStructure;
+        if (meta.techStack) newForm.techStack = meta.techStack;
+      }
+      setForm(newForm);
       const captions = (json.captions || {}) as Record<string, string>;
       if (Object.keys(captions).length > 0) {
         setPhotos(

@@ -154,14 +154,16 @@ function WizardContent() {
         throw new Error(json.error || "Generation failed");
       }
 
+      const extracted = json.data.extractedMetadata || {};
+
       // Save to localStorage to transfer state to editor page
       localStorage.setItem("auto_draft_ai_state", JSON.stringify(json.data));
       localStorage.setItem(
         "auto_draft_form_state",
         JSON.stringify({
           title: json.data.generatedTitle || title,
-          date,
-          venue,
+          date: extracted.date || date,
+          venue: extracted.venue || venue,
           participants,
           highlights,
           rawDescription,
@@ -170,22 +172,22 @@ function WizardContent() {
           semester: REPORT_DEFAULTS.semester,
           acaRNo: REPORT_DEFAULTS.acaRNo,
           revNo: REPORT_DEFAULTS.revNo,
-          advisor: SIGNATORIES.advisor,
-          sdpHead: SIGNATORIES.sdpHead,
-          principal: SIGNATORIES.principal,
-          technicalLead: SIGNATORIES.technicalLead,
+          advisor: extracted.advisor || SIGNATORIES.advisor,
+          sdpHead: extracted.sdpHead || SIGNATORIES.sdpHead,
+          principal: extracted.principal || SIGNATORIES.principal,
+          technicalLead: extracted.technicalLead || SIGNATORIES.technicalLead,
           docType,
-          recipient,
-          senderName,
-          senderDesignation,
-          organizedBy,
-          facultyCoordinator,
+          recipient: extracted.recipient || recipient,
+          senderName: extracted.senderName || senderName,
+          senderDesignation: extracted.senderDesignation || senderDesignation,
+          organizedBy: extracted.organizedBy || organizedBy,
+          facultyCoordinator: extracted.facultyCoordinator || facultyCoordinator,
           startTime,
           endTime,
           duration,
-          projectTrack,
-          teamStructure,
-          techStack,
+          projectTrack: extracted.projectTrack || projectTrack,
+          teamStructure: extracted.teamStructure || teamStructure,
+          techStack: extracted.techStack || techStack,
           totalFinancialRequest,
           hardwareSourcing,
           labAccess,

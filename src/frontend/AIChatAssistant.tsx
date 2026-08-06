@@ -66,9 +66,38 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
         throw new Error(json.error || "Failed to update document");
       }
 
-      // Update AI state in real-time
+      // Update AI state in real-time and extract form metadata changes
       setAi(json.data);
-      setForm({ ...form, instructions: updatedInstructions });
+
+      const newForm = { ...form, instructions: updatedInstructions };
+      if (json.data.generatedTitle) {
+        newForm.title = json.data.generatedTitle;
+      }
+      if (json.data.extractedMetadata) {
+        const meta = json.data.extractedMetadata;
+        if (meta.recipient) newForm.recipient = meta.recipient;
+        if (meta.senderName) newForm.senderName = meta.senderName;
+        if (meta.senderDesignation) newForm.senderDesignation = meta.senderDesignation;
+        if (meta.date) newForm.date = meta.date;
+        if (meta.advisor) newForm.advisor = meta.advisor;
+        if (meta.sdpHead) newForm.sdpHead = meta.sdpHead;
+        if (meta.principal) newForm.principal = meta.principal;
+        if (meta.eventCoordinator) newForm.eventCoordinator = meta.eventCoordinator;
+        if (meta.technicalLead) newForm.technicalLead = meta.technicalLead;
+        if (meta.organizedBy) newForm.organizedBy = meta.organizedBy;
+        if (meta.facultyCoordinator) newForm.facultyCoordinator = meta.facultyCoordinator;
+        if (meta.projectTrack) newForm.projectTrack = meta.projectTrack;
+        if (meta.teamStructure) newForm.teamStructure = meta.teamStructure;
+        if (meta.techStack) newForm.techStack = meta.techStack;
+      }
+      setForm(newForm);
+
+      try {
+        localStorage.setItem("auto_draft_form_state", JSON.stringify(newForm));
+        localStorage.setItem("auto_draft_ai_state", JSON.stringify(json.data));
+      } catch (e) {
+        console.error(e);
+      }
 
       const aiReply: ChatMessage = {
         id: (Date.now() + 1).toString(),

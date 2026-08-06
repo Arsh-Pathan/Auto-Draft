@@ -1,15 +1,24 @@
 import "server-only";
-import { ReportDataSchema, type ReportData, type DocType } from "@/types/report";
+import { ReportDataSchema, type ReportData, type DocType, type FormState } from "@/types/report";
 import { callGemini, type ChatMessage, type ChatImage } from "@/backend/gemini";
 
-const SYSTEM_PROMPT = `You are a formal academic report writer for the AI & ML Club at Dhole Patil College of Engineering. Convert the user's messy notes into a structured event report.
+const SYSTEM_PROMPT = `You are a formal academic report writer for the AI & ML Club at Dhole Patil College of Engineering. Convert the user's notes and chat requests into a structured event report and extracted metadata.
 
-Tone: formal, third person, past tense, no marketing fluff, no emojis, Indian English spelling. Do not invent facts that are not implied by the input. If a detail is missing, write generally rather than fabricating specifics.
+Tone: formal, third person, past tense, no marketing fluff, no emojis, Indian English spelling. Do not invent facts that are not implied by the input.
 
 Return ONLY a JSON object matching this schema. No prose, no markdown, no code fences.
 
 {
-  "generatedTitle": "String (Create a professional, formal academic report title for the event if the user provided a weak one or none at all, e.g. 'Meta x PyTorch OpenEnv Hackathon Report')",
+  "generatedTitle": "String (Create a professional, formal academic report title for the event if the user provided a weak one or none at all)",
+  "extractedMetadata": {
+    "recipient": "String (If the user specified a recipient like 'To Teacher Guardian', format as formal multi-line address)",
+    "senderName": "String (Sender name if mentioned, e.g. 'Arsh Pathan')",
+    "senderDesignation": "String (Sender designation if mentioned)",
+    "date": "String (Date formatted YYYY-MM-DD or formal date)",
+    "advisor": "String (Club Advisor name/designation if requested to add/update signature of club advisor)",
+    "sdpHead": "String (SDP Head name/designation if requested)",
+    "principal": "String (Principal name/designation if requested)"
+  },
   "sections": [
     {
       "id": "unique-string-id",
@@ -19,51 +28,31 @@ Return ONLY a JSON object matching this schema. No prose, no markdown, no code f
       "bullets": ["String array"] (only if type is 'bullets'),
       "table": [["Row 1 Col 1", "Row 1 Col 2"], ["Row 2 Col 1", "Row 2 Col 2"]] (only if type is 'table'),
       "imageIndex": 0 (only if type is 'image', integer corresponding to uploaded photos index),
-      "imageCaption": "String (only if type is 'image'). A short, formal label (max ~12 words) describing what the photograph shows."
+      "imageCaption": "String (only if type is 'image')."
     }
   ]
 }
 
-Structure the report intelligently. Use tables if appropriate for comparing data or schedules. Use bullets for objectives or key points.
+Structure the report intelligently. Extract metadata updates if present in raw notes or instructions.`;
 
-PHOTO HANDLING:
-- Emit one section with type "image" for EVERY photograph supplied, using imageIndex 0..N-1 matching the photo order.
-- Place each image section contextually interleaved between text/bullet sections.
-- Image sections should have heading set to an empty string.`;
+const SYSTEM_PROMPT_APPLICATION = `You are an intelligent formal academic letter writer & metadata extractor for Dhole Patil College of Engineering.
+Convert the user's raw input, notes, and chat requests into structured letter body sections AND extracted header metadata (recipient address, sender, signatures, date).
 
-const SYSTEM_PROMPT_APPLICATION = `You are a formal academic letter writer for Dhole Patil College of Engineering.
-Convert the user's raw notes and requirements into ONLY the body paragraphs of a formal academic application / letter (e.g., duty attendance request, fee refund application, leave application, permission request).
+CRITICAL CONSTRAINTS FOR METADATA EXTRACTION:
+1. If the user mentions recipient details (e.g. "To Teacher Guardian", "To The Principal", "To HOD AI & ML"), extract and format the full formal recipient block in "extractedMetadata.recipient" (e.g. "To,\nThe Teacher Guardian,\nDepartment of Artificial Intelligence and Machine Learning,\nDhole Patil College of Engineering, Pune.").
+2. If the user mentions sender details (e.g. "From Arsh Pathan", "Student, Dept of AI & ML"), extract "extractedMetadata.senderName" and "extractedMetadata.senderDesignation".
+3. If the user requests signatures (e.g. "add signature of club advisor", "signature of HOD", "signature of principal"), populate "extractedMetadata.advisor", "extractedMetadata.sdpHead", or "extractedMetadata.principal" with formal titles.
 
 CRITICAL CONSTRAINTS FOR SECTIONS:
-1. Output ONLY the main body text/paragraphs of the letter inside the "sections" array.
-2. DO NOT include headers, titles (like "APPLICATION"), date ("Date: ..."), "To,", recipient addresses, "From,", sender addresses, "Subject:", salutations ("Respected Sir/Madam,"), closings ("Thanking You.", "Yours faithfully", "Yours sincerely"), or signature lines. The visual document template ALREADY renders all of these outer letter elements automatically around your text!
+1. Output ONLY the main body paragraphs of the letter inside the "sections" array.
+2. DO NOT include headers, titles (like "APPLICATION"), date ("Date: ..."), "To,", recipient addresses, "From,", sender addresses, "Subject:", salutations ("Respected Sir/Madam,"), closings ("Thanking You.", "Yours faithfully"), or signature lines inside the "sections" text. The visual document template ALREADY renders all of these outer letter elements automatically from the metadata!
 3. Each item in "sections" should be a clear, well-written body paragraph explaining the request, background context, justification, and respectful closing request.
-4. Keep headings empty (heading: "") for standard body paragraphs.
-5. NEVER repeat sentences, dates, addresses, subjects, or salutations in your output.
 
-Tone: formal, respectful, polite, clear, first person ("I am writing to..."), Indian English spelling. Do not invent details not implied by user input.
+Return ONLY a JSON object matching the schema. No prose, no markdown, no code fences.`;
 
-Return ONLY a JSON object matching this schema. No prose, no markdown, no code fences.
+const SYSTEM_PROMPT_CLOSING_MEETING = `You are a formal academic report writer & metadata extractor for Student Development Program (SDP) & AI & ML Club at Dhole Patil College of Engineering. Produce structured content and extracted metadata for a Closing Meeting Report.
 
-{
-  "generatedTitle": "A concise, professional subject line (e.g., 'Request for Granting Duty Attendance for AI & ML Club Representation')",
-  "sections": [
-    {
-      "id": "sec-1",
-      "heading": "",
-      "type": "text",
-      "text": "First body paragraph of the application..."
-    },
-    {
-      "id": "sec-2",
-      "heading": "",
-      "type": "text",
-      "text": "Second body paragraph of the application..."
-    }
-  ]
-}`;
-
-const SYSTEM_PROMPT_CLOSING_MEETING = `You are a formal academic report writer for Student Development Program (SDP) & AI & ML Club at Dhole Patil College of Engineering. Produce structured content for a Closing Meeting Report.
+Extract metadata (organizedBy, facultyCoordinator, date, venue, startTime, endTime, duration, advisor, sdpHead, principal) into "extractedMetadata" if mentioned or requested.
 
 Generate sections corresponding to:
 1. Brief description of the event (heading: "1. Brief Description of the Event", type: "text")
@@ -72,10 +61,11 @@ Generate sections corresponding to:
 4. Suggestions & Recommendations from organizing team members (heading: "4. Suggestions & Recommendations from Organizing Team Members", type: "bullets")
 5. Suggestions & Recommendations from Management (heading: "5. Suggestions & Recommendations from Management", type: "bullets")
 
-Tone: formal, objective, constructive, Indian English spelling.
-Return ONLY a JSON object with generatedTitle and sections matching the schema.`;
+Tone: formal, objective, constructive, Indian English spelling.`;
 
-const SYSTEM_PROMPT_PROJECT_PROPOSAL = `You are a technical proposal writer for the AI & ML Club at Dhole Patil College of Engineering. Produce structured sections for an official Project Proposal Form.
+const SYSTEM_PROMPT_PROJECT_PROPOSAL = `You are a technical proposal writer & metadata extractor for the AI & ML Club at Dhole Patil College of Engineering. Produce structured sections and extracted metadata for an official Project Proposal Form.
+
+Extract metadata (projectTrack, teamStructure, techStack, totalFinancialRequest, senderName) into "extractedMetadata" if mentioned or requested.
 
 Generate sections covering:
 1. Executive Concept Overview (heading: "Concept Overview", type: "text")
@@ -84,13 +74,31 @@ Generate sections covering:
 4. Implementation Plan & Milestones (heading: "30-Day Sprint Milestones", type: "bullets")
 5. Expected Outcomes & Deliverables (heading: "Expected Project Outcomes", type: "text")
 
-Tone: technical, innovative, precise, professional, Indian English spelling.
-Return ONLY a JSON object with generatedTitle (Subject) and sections matching the schema.`;
+Tone: technical, innovative, precise, professional.`;
 
 const REPORT_JSON_SCHEMA = {
   type: "object",
   properties: {
     generatedTitle: { type: "string" },
+    extractedMetadata: {
+      type: "object",
+      properties: {
+        recipient: { type: "string" },
+        senderName: { type: "string" },
+        senderDesignation: { type: "string" },
+        date: { type: "string" },
+        advisor: { type: "string" },
+        sdpHead: { type: "string" },
+        principal: { type: "string" },
+        eventCoordinator: { type: "string" },
+        technicalLead: { type: "string" },
+        organizedBy: { type: "string" },
+        facultyCoordinator: { type: "string" },
+        projectTrack: { type: "string" },
+        teamStructure: { type: "string" },
+        techStack: { type: "string" },
+      },
+    },
     sections: {
       type: "array",
       items: {
@@ -140,7 +148,35 @@ export type GenerateInput = {
   teamStructure?: string;
   techStack?: string;
   totalFinancialRequest?: string;
+  advisor?: string;
+  sdpHead?: string;
+  principal?: string;
 };
+
+export function applyExtractedMetadata(form: FormState, data: ReportData): FormState {
+  const updated = { ...form };
+  if (data.generatedTitle) {
+    updated.title = data.generatedTitle;
+  }
+  if (data.extractedMetadata) {
+    const meta = data.extractedMetadata;
+    if (meta.recipient) updated.recipient = meta.recipient;
+    if (meta.senderName) updated.senderName = meta.senderName;
+    if (meta.senderDesignation) updated.senderDesignation = meta.senderDesignation;
+    if (meta.date) updated.date = meta.date;
+    if (meta.advisor) updated.advisor = meta.advisor;
+    if (meta.sdpHead) updated.sdpHead = meta.sdpHead;
+    if (meta.principal) updated.principal = meta.principal;
+    if (meta.eventCoordinator) updated.eventCoordinator = meta.eventCoordinator;
+    if (meta.technicalLead) updated.technicalLead = meta.technicalLead;
+    if (meta.organizedBy) updated.organizedBy = meta.organizedBy;
+    if (meta.facultyCoordinator) updated.facultyCoordinator = meta.facultyCoordinator;
+    if (meta.projectTrack) updated.projectTrack = meta.projectTrack;
+    if (meta.teamStructure) updated.teamStructure = meta.teamStructure;
+    if (meta.techStack) updated.techStack = meta.techStack;
+  }
+  return updated;
+}
 
 function buildUserMessage(input: GenerateInput): string {
   if (input.docType === "application") {
@@ -148,14 +184,15 @@ function buildUserMessage(input: GenerateInput): string {
       `DOCUMENT TYPE: Academic Letter / Application`,
       `SUBJECT/TITLE: ${input.title || "(not provided)"}`,
       `DATE: ${input.date || "(not provided)"}`,
-      `RECIPIENT: ${input.recipient || "(not provided)"}`,
-      `SENDER NAME: ${input.senderName || "(not provided)"}`,
-      `SENDER DESIGNATION: ${input.senderDesignation || "(not provided)"}`,
+      `CURRENT RECIPIENT: ${input.recipient || "(not provided)"}`,
+      `CURRENT SENDER NAME: ${input.senderName || "(not provided)"}`,
+      `CURRENT SENDER DESIGNATION: ${input.senderDesignation || "(not provided)"}`,
+      `CURRENT CLUB ADVISOR SIGNATURE: ${input.advisor || "(not provided)"}`,
       `RAW DESCRIPTION / DETAILS: ${input.rawDescription || "(not provided)"}`,
       `KEY HIGHLIGHTS / NOTES: ${input.highlights || "(not provided)"}`,
     ];
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
     }
     return base.join("\n");
   }
@@ -176,7 +213,7 @@ function buildUserMessage(input: GenerateInput): string {
       `KEY HIGHLIGHTS / CHALLENGES: ${input.highlights || "(not provided)"}`,
     ];
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
     }
     return base.join("\n");
   }
@@ -193,7 +230,7 @@ function buildUserMessage(input: GenerateInput): string {
       `KEY HIGHLIGHTS / REQUIREMENTS: ${input.highlights || "(not provided)"}`,
     ];
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
     }
     return base.join("\n");
   }
@@ -219,7 +256,7 @@ function buildUserMessage(input: GenerateInput): string {
     base.push("PHOTOS: (none uploaded)");
   }
   if (input.instructions) {
-    base.push(`\nSPECIAL USER INSTRUCTIONS:\n${input.instructions}`);
+    base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
   }
   return base.join("\n");
 }

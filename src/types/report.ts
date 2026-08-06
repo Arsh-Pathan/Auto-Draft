@@ -13,8 +13,26 @@ export const ReportSectionSchema = z.object({
 
 export type ReportSection = z.infer<typeof ReportSectionSchema>;
 
+export const ExtractedMetadataSchema = z.object({
+  recipient: z.string().optional(),
+  senderName: z.string().optional(),
+  senderDesignation: z.string().optional(),
+  date: z.string().optional(),
+  advisor: z.string().optional(),
+  sdpHead: z.string().optional(),
+  principal: z.string().optional(),
+  eventCoordinator: z.string().optional(),
+  technicalLead: z.string().optional(),
+  organizedBy: z.string().optional(),
+  facultyCoordinator: z.string().optional(),
+  projectTrack: z.string().optional(),
+  teamStructure: z.string().optional(),
+  techStack: z.string().optional(),
+}).optional();
+
 export const ReportDataSchema = z.object({
   generatedTitle: z.string().optional(),
+  extractedMetadata: ExtractedMetadataSchema,
   sections: z.array(ReportSectionSchema),
 });
 

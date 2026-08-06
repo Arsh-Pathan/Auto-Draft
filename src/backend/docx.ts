@@ -298,25 +298,63 @@ export async function buildDocx(
           }),
         ],
       }),
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 60 },
-        children: [new TextRun({ text: "To,", bold: true, font: "Calibri", size: 23 })],
-      }),
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 240 },
-        children: [
-          new TextRun({
-            text: meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.",
-            font: "Calibri",
-            size: 23,
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+          top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                width: { size: 65, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { after: 40 },
+                    children: [new TextRun({ text: "To,", bold: true, font: "Calibri", size: 23 })],
+                  }),
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { after: 120 },
+                    children: [
+                      new TextRun({
+                        text: meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.",
+                        font: "Calibri",
+                        size: 23,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              new TableCell({
+                width: { size: 35, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.RIGHT,
+                    children: [
+                      new TextRun({
+                        text: `Date: ${meta.date ? formatDateShort(meta.date) : "____________"}`,
+                        bold: true,
+                        font: "Calibri",
+                        size: 23,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
         ],
       }),
       new Paragraph({
         alignment: AlignmentType.LEFT,
-        spacing: { after: 240 },
+        spacing: { before: 180, after: 240 },
         children: [
           new TextRun({ text: "Subject: ", bold: true, font: "Calibri", size: 23 }),
           new TextRun({ text: meta.title || "Request for Application", bold: true, font: "Calibri", size: 23 }),
@@ -325,7 +363,7 @@ export async function buildDocx(
       new Paragraph({
         alignment: AlignmentType.LEFT,
         spacing: { after: 180 },
-        children: [new TextRun({ text: "Respected Sir,", bold: true, font: "Calibri", size: 23 })],
+        children: [new TextRun({ text: "Respected Sir/Madam,", bold: true, font: "Calibri", size: 23 })],
       })
     );
   } else {
@@ -602,16 +640,33 @@ export async function buildDocx(
           cantSplit: true,
           children: [
             new TableCell({
-              width: { size: 50, type: WidthType.PERCENTAGE },
+              width: { size: 33, type: WidthType.PERCENTAGE },
               children: [
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
-                  children: [new TextRun({ text: `Date: ${meta.date ? formatDateShort(meta.date) : "____________"}`, bold: true, font: "Calibri", size: 23 })],
+                  children: [new TextRun({ text: "Club Advisor", bold: true, font: "Calibri", size: 23 })],
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.LEFT,
+                  children: [new TextRun({ text: signatories.advisor || "Prof. Yugashree Pawar", font: "Calibri", size: 23 })],
                 }),
               ],
             }),
             new TableCell({
-              width: { size: 50, type: WidthType.PERCENTAGE },
+              width: { size: 33, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [new TextRun({ text: "SDP Head", bold: true, font: "Calibri", size: 23 })],
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [new TextRun({ text: signatories.sdpHead || "Head - SDP", font: "Calibri", size: 23 })],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 33, type: WidthType.PERCENTAGE },
               children: [
                 new Paragraph({
                   alignment: AlignmentType.RIGHT,
