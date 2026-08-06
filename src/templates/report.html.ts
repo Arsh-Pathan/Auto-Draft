@@ -288,7 +288,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         <div style="display: table; width: 100%; margin-bottom: 20pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif; table-layout: fixed;">
           <div style="display: table-cell; width: 65%; vertical-align: top; line-height: 1.5;">
             <strong>To,</strong><br/>
-            ${meta.recipient ? escapeHtml(meta.recipient).replace(/\n/g, '<br/>') : "The Respected Principal,<br/>Dhole Patil College of Engineering, Pune."}
+            ${escapeHtml((meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.").replace(/^(To,?\s*)+/i, "")).replace(/\n/g, '<br/>')}
           </div>
           <div style="display: table-cell; width: 35%; text-align: right; vertical-align: top;">
             <strong>Date:</strong> ${meta.date ? formatDateShort(meta.date) : "______________"}
@@ -315,18 +315,32 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         </div>
         
         <div class="signatures" style="margin-top: 60pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed; font-family: 'Calibri', sans-serif; font-size: 11pt;">
-          <div style="display: table-cell; width: 33.33%; text-align: left; vertical-align: bottom;">
-            <strong>Club Advisor</strong><br/>
-            ${escapeHtml(signatories.advisor || "Prof. Yugashree Pawar")}
-          </div>
-          <div style="display: table-cell; width: 33.33%; text-align: center; vertical-align: bottom;">
-            <strong>SDP Head</strong><br/>
-            ${escapeHtml(signatories.sdpHead || "Head - SDP")}
-          </div>
-          <div style="display: table-cell; width: 33.33%; text-align: right; vertical-align: bottom;">
-            <strong>Principal Sir</strong><br/>
-            ${escapeHtml(signatories.principal || "Prof. Abhijit Dandavate")}
-          </div>
+          ${meta.signatoryList && meta.signatoryList.length > 0 ? (
+            meta.signatoryList.map((sig, idx) => {
+              const count = meta.signatoryList!.length;
+              const colWidth = (100 / count).toFixed(2);
+              const align = idx === 0 ? "left" : idx === count - 1 ? "right" : "center";
+              return `
+                <div style="display: table-cell; width: ${colWidth}%; text-align: ${align}; vertical-align: bottom;">
+                  <strong>${escapeHtml(sig.title)}</strong><br/>
+                  ${escapeHtml(sig.name || "")}
+                </div>
+              `;
+            }).join("")
+          ) : `
+            <div style="display: table-cell; width: 33.33%; text-align: left; vertical-align: bottom;">
+              <strong>Club Advisor</strong><br/>
+              ${escapeHtml(signatories.advisor || "Prof. Yugashree Pawar")}
+            </div>
+            <div style="display: table-cell; width: 33.33%; text-align: center; vertical-align: bottom;">
+              <strong>SDP Head</strong><br/>
+              ${escapeHtml(signatories.sdpHead || "Head - SDP")}
+            </div>
+            <div style="display: table-cell; width: 33.33%; text-align: right; vertical-align: bottom;">
+              <strong>Principal Sir</strong><br/>
+              ${escapeHtml(signatories.principal || "Prof. Abhijit Dandavate")}
+            </div>
+          `}
         </div>
         ` : `
         <!-- Standard Activity Report Layout -->

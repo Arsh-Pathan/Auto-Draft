@@ -324,7 +324,7 @@ export async function buildDocx(
                     spacing: { after: 120 },
                     children: [
                       new TextRun({
-                        text: meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.",
+                        text: (meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.").replace(/^(To,?\s*)+/i, ""),
                         font: "Calibri",
                         size: 23,
                       }),
@@ -625,6 +625,33 @@ export async function buildDocx(
       })
     );
 
+    const activeSigs = meta.signatoryList && meta.signatoryList.length > 0
+      ? meta.signatoryList
+      : [
+          { title: "Club Advisor", name: signatories.advisor || "Prof. Yugashree Pawar" },
+          { title: "SDP Head", name: signatories.sdpHead || "Head - SDP" },
+          { title: "Principal Sir", name: signatories.principal || "Prof. Abhijit Dandavate" },
+        ];
+
+    const cellWidth = Math.floor(100 / activeSigs.length);
+
+    const footerCells = activeSigs.map((sig, idx) => {
+      const align = idx === 0 ? AlignmentType.LEFT : idx === activeSigs.length - 1 ? AlignmentType.RIGHT : AlignmentType.CENTER;
+      return new TableCell({
+        width: { size: cellWidth, type: WidthType.PERCENTAGE },
+        children: [
+          new Paragraph({
+            alignment: align,
+            children: [new TextRun({ text: sig.title, bold: true, font: "Calibri", size: 23 })],
+          }),
+          new Paragraph({
+            alignment: align,
+            children: [new TextRun({ text: sig.name || "", font: "Calibri", size: 23 })],
+          }),
+        ],
+      });
+    });
+
     const appFooterTable = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       borders: {
@@ -638,47 +665,7 @@ export async function buildDocx(
       rows: [
         new TableRow({
           cantSplit: true,
-          children: [
-            new TableCell({
-              width: { size: 33, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  children: [new TextRun({ text: "Club Advisor", bold: true, font: "Calibri", size: 23 })],
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  children: [new TextRun({ text: signatories.advisor || "Prof. Yugashree Pawar", font: "Calibri", size: 23 })],
-                }),
-              ],
-            }),
-            new TableCell({
-              width: { size: 33, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
-                  children: [new TextRun({ text: "SDP Head", bold: true, font: "Calibri", size: 23 })],
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
-                  children: [new TextRun({ text: signatories.sdpHead || "Head - SDP", font: "Calibri", size: 23 })],
-                }),
-              ],
-            }),
-            new TableCell({
-              width: { size: 33, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.RIGHT,
-                  children: [new TextRun({ text: "Principal Sir", bold: true, font: "Calibri", size: 23 })],
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.RIGHT,
-                  children: [new TextRun({ text: signatories.principal || "Prof. Abhijit Dandavate", font: "Calibri", size: 23 })],
-                }),
-              ],
-            }),
-          ],
+          children: footerCells,
         }),
       ],
     });

@@ -13,6 +13,13 @@ export const ReportSectionSchema = z.object({
 
 export type ReportSection = z.infer<typeof ReportSectionSchema>;
 
+export const SignatoryItemSchema = z.object({
+  title: z.string(),
+  name: z.string().optional(),
+});
+
+export type SignatoryItem = z.infer<typeof SignatoryItemSchema>;
+
 export const ExtractedMetadataSchema = z.object({
   recipient: z.string().optional(),
   senderName: z.string().optional(),
@@ -28,6 +35,7 @@ export const ExtractedMetadataSchema = z.object({
   projectTrack: z.string().optional(),
   teamStructure: z.string().optional(),
   techStack: z.string().optional(),
+  signatoryList: z.array(SignatoryItemSchema).optional(),
 }).optional();
 
 export const ReportDataSchema = z.object({
@@ -77,6 +85,7 @@ export type ReportMeta = {
   videoLinks?: string;
   paperLinks?: string;
   technicalLead?: string;
+  signatoryList?: SignatoryItem[];
 };
 
 export type Photograph = {
@@ -120,6 +129,7 @@ export type FormState = {
   recipient?: string;
   senderName?: string;
   senderDesignation?: string;
+  signatoryList?: SignatoryItem[];
   // Closing Meeting fields
   organizedBy?: string;
   facultyCoordinator?: string;

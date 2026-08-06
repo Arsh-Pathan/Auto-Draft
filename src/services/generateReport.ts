@@ -39,9 +39,12 @@ const SYSTEM_PROMPT_APPLICATION = `You are an intelligent formal academic letter
 Convert the user's raw input, notes, and chat requests into structured letter body sections AND extracted header metadata (recipient address, sender, signatures, date).
 
 CRITICAL CONSTRAINTS FOR METADATA EXTRACTION:
-1. If the user mentions recipient details (e.g. "To Teacher Guardian", "To The Principal", "To HOD AI & ML"), extract and format the full formal recipient block in "extractedMetadata.recipient" (e.g. "To,\nThe Teacher Guardian,\nDepartment of Artificial Intelligence and Machine Learning,\nDhole Patil College of Engineering, Pune.").
+1. For "extractedMetadata.recipient": DO NOT start with "To," or "To,". Output ONLY the formal designation and department lines (e.g. "The Teacher Guardian,\nDepartment of Artificial Intelligence and Machine Learning,\nDhole Patil College of Engineering, Pune.").
 2. If the user mentions sender details (e.g. "From Arsh Pathan", "Student, Dept of AI & ML"), extract "extractedMetadata.senderName" and "extractedMetadata.senderDesignation".
-3. If the user requests signatures (e.g. "add signature of club advisor", "signature of HOD", "signature of principal"), populate "extractedMetadata.advisor", "extractedMetadata.sdpHead", or "extractedMetadata.principal" with formal titles.
+3. SIGNATORY LIST EXTRACTION:
+   - If the user explicitly specifies which signatories to include or remove (e.g., "add signature of club advisor and the tg noone else", "remove principal sir", "only club advisor and teacher guardian"), output "extractedMetadata.signatoryList" containing ONLY those requested signatories as an array of objects:
+     `[ { "title": "Club Advisor", "name": "Prof. Yugashree Pawar" }, { "title": "Teacher Guardian", "name": "Department TG Coordinator" } ]`.
+   - If the user asks to "remove principal sir" or "no one else", DO NOT include Principal Sir or other non-requested titles in "extractedMetadata.signatoryList"!
 
 CRITICAL CONSTRAINTS FOR SECTIONS:
 1. Output ONLY the main body paragraphs of the letter inside the "sections" array.
@@ -97,6 +100,17 @@ const REPORT_JSON_SCHEMA = {
         projectTrack: { type: "string" },
         teamStructure: { type: "string" },
         techStack: { type: "string" },
+        signatoryList: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              name: { type: "string" },
+            },
+            required: ["title"],
+          },
+        },
       },
     },
     sections: {
@@ -174,6 +188,7 @@ export function applyExtractedMetadata(form: FormState, data: ReportData): FormS
     if (meta.projectTrack) updated.projectTrack = meta.projectTrack;
     if (meta.teamStructure) updated.teamStructure = meta.teamStructure;
     if (meta.techStack) updated.techStack = meta.techStack;
+    if (meta.signatoryList) updated.signatoryList = meta.signatoryList;
   }
   return updated;
 }
