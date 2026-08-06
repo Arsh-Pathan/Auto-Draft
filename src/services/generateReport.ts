@@ -31,22 +31,34 @@ PHOTO HANDLING:
 - Place each image section contextually interleaved between text/bullet sections.
 - Image sections should have heading set to an empty string.`;
 
-const SYSTEM_PROMPT_APPLICATION = `You are a formal academic letter writer for Dhole Patil College of Engineering. Convert the user's raw notes and requirements into a structured, formal letter (e.g., leave application, permission request, budget approval).
+const SYSTEM_PROMPT_APPLICATION = `You are a formal academic letter writer for Dhole Patil College of Engineering.
+Convert the user's raw notes and requirements into ONLY the body paragraphs of a formal academic application / letter (e.g., duty attendance request, fee refund application, leave application, permission request).
 
-Tone: formal, respectful, polite, first or third person as appropriate, no marketing fluff, no emojis, Indian English spelling. Write professionally, addressing the recipient appropriately. Do not invent facts not implied by the input.
+CRITICAL CONSTRAINTS FOR SECTIONS:
+1. Output ONLY the main body text/paragraphs of the letter inside the "sections" array.
+2. DO NOT include headers, titles (like "APPLICATION"), date ("Date: ..."), "To,", recipient addresses, "From,", sender addresses, "Subject:", salutations ("Respected Sir/Madam,"), closings ("Thanking You.", "Yours faithfully", "Yours sincerely"), or signature lines. The visual document template ALREADY renders all of these outer letter elements automatically around your text!
+3. Each item in "sections" should be a clear, well-written body paragraph explaining the request, background context, justification, and respectful closing request.
+4. Keep headings empty (heading: "") for standard body paragraphs.
+5. NEVER repeat sentences, dates, addresses, subjects, or salutations in your output.
+
+Tone: formal, respectful, polite, clear, first person ("I am writing to..."), Indian English spelling. Do not invent details not implied by user input.
 
 Return ONLY a JSON object matching this schema. No prose, no markdown, no code fences.
 
 {
-  "generatedTitle": "String (A short, professional Subject for the application, e.g., 'Permission to Book Seminar Hall for AI Workshop')",
+  "generatedTitle": "A concise, professional subject line (e.g., 'Request for Granting Duty Attendance for AI & ML Club Representation')",
   "sections": [
     {
-      "id": "unique-string-id",
-      "heading": "String (Optional section headings if the application has sub-sections).",
-      "type": "text | bullets | table",
-      "text": "String (only if type is 'text')",
-      "bullets": ["String array"] (only if type is 'bullets'),
-      "table": [["Col 1", "Col 2"]] (only if type is 'table')
+      "id": "sec-1",
+      "heading": "",
+      "type": "text",
+      "text": "First body paragraph of the application..."
+    },
+    {
+      "id": "sec-2",
+      "heading": "",
+      "type": "text",
+      "text": "Second body paragraph of the application..."
     }
   ]
 }`;
@@ -93,7 +105,7 @@ const REPORT_JSON_SCHEMA = {
           imageIndex: { type: "number" },
           imageCaption: { type: "string" },
         },
-        required: ["id", "heading", "type"],
+        required: ["id", "type"],
       },
     },
   },
@@ -213,7 +225,17 @@ function buildUserMessage(input: GenerateInput): string {
 }
 
 function tryParseJson(raw: string): unknown {
-  const trimmed = raw.trim().replace(/^```(?:json)?/, "").replace(/```$/, "").trim();
+  let trimmed = raw.trim();
+  const jsonMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonMatch && jsonMatch[1]) {
+    trimmed = jsonMatch[1].trim();
+  } else {
+    const start = trimmed.indexOf("{");
+    const end = trimmed.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      trimmed = trimmed.substring(start, end + 1);
+    }
+  }
   return JSON.parse(trimmed);
 }
 

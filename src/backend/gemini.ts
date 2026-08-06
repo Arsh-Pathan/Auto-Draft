@@ -1,7 +1,7 @@
 import "server-only";
 
 const GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-3.6-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export type ChatImage = {
   mime: string;
@@ -32,13 +32,10 @@ type GeminiResponse = {
 };
 
 const MODEL_SEQUENCE = [
-  "gemini-3.6-flash",
-  "gemini-3.5-flash",
   "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-2.5-pro",
   "gemini-2.0-flash",
   "gemini-1.5-flash",
+  "gemini-1.5-pro",
 ];
 
 export class GeminiService {

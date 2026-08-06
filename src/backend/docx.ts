@@ -284,72 +284,48 @@ export async function buildDocx(
     docChildren.push(proposalMetaTable, new Paragraph({ spacing: { after: 200 }, children: [] }));
   } else if (isApp) {
     // Application Letter Layout
-    docChildren.push(...headerBlock);
-
-    // Date (aligned right)
     docChildren.push(
+      ...headerBlock,
       new Paragraph({
-        alignment: AlignmentType.RIGHT,
-        spacing: { before: 120, after: 240 },
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 180, after: 240 },
         children: [
           new TextRun({
-            text: `Date: ${formatDateShort(meta.date)}`,
-            font: "Calibri",
-            size: 22, // 11pt
+            text: "APPLICATION",
             bold: true,
+            font: "Calibri",
+            size: 32, // 16pt
           }),
         ],
-      })
-    );
-
-    // To Recipient
-    docChildren.push(
+      }),
       new Paragraph({
         alignment: AlignmentType.LEFT,
         spacing: { after: 60 },
+        children: [new TextRun({ text: "To,", bold: true, font: "Calibri", size: 23 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 240 },
         children: [
-          new TextRun({ text: "To,", bold: true, font: "Calibri", size: 22 }),
+          new TextRun({
+            text: meta.recipient || "The Respected Principal,\nDhole Patil College of Engineering, Pune.",
+            font: "Calibri",
+            size: 23,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 240 },
+        children: [
+          new TextRun({ text: "Subject: ", bold: true, font: "Calibri", size: 23 }),
+          new TextRun({ text: meta.title || "Request for Application", bold: true, font: "Calibri", size: 23 }),
         ],
       }),
       new Paragraph({
         alignment: AlignmentType.LEFT,
         spacing: { after: 180 },
-        children: [
-          new TextRun({
-            text: `${meta.recipient || "The Principal,"}\nDhole Patil College of Engineering,\nPune.`,
-            font: "Calibri",
-            size: 22,
-          }),
-        ],
-      })
-    );
-
-    // Subject
-    docChildren.push(
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 180 },
-        children: [
-          new TextRun({ text: "Subject: ", bold: true, font: "Calibri", size: 22 }),
-          new TextRun({
-            text: meta.title || "Application Request",
-            bold: true,
-            font: "Calibri",
-            size: 22,
-            underline: { type: UnderlineType.SINGLE },
-          }),
-        ],
-      })
-    );
-
-    // Salutation
-    docChildren.push(
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 120 },
-        children: [
-          new TextRun({ text: "Respected Sir/Madam,", font: "Calibri", size: 22 }),
-        ],
+        children: [new TextRun({ text: "Respected Sir,", bold: true, font: "Calibri", size: 23 })],
       })
     );
   } else {
@@ -587,6 +563,72 @@ export async function buildDocx(
     });
     for (let i = 0; i < 4; i++) docChildren.push(new Paragraph({ text: "" }));
     docChildren.push(proposalSigTable);
+  } else if (isApp) {
+    docChildren.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 240, after: 120 },
+        children: [new TextRun({ text: "Thanking You.", font: "Calibri", size: 23 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 40 },
+        children: [new TextRun({ text: "Yours sincerely,", font: "Calibri", size: 23 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 20 },
+        children: [new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 23 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 360 },
+        children: [new TextRun({ text: meta.senderDesignation || "Student, Department of AI & ML", font: "Calibri", size: 23 })],
+      })
+    );
+
+    const appFooterTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      },
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.LEFT,
+                  children: [new TextRun({ text: `Date: ${meta.date ? formatDateShort(meta.date) : "____________"}`, bold: true, font: "Calibri", size: 23 })],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: "Principal Sir", bold: true, font: "Calibri", size: 23 })],
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: signatories.principal || "Prof. Abhijit Dandavate", font: "Calibri", size: 23 })],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+    for (let i = 0; i < 4; i++) docChildren.push(new Paragraph({ text: "" }));
+    docChildren.push(appFooterTable);
   } else {
     const signatureTable = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
@@ -625,28 +667,7 @@ export async function buildDocx(
       ],
     });
 
-    if (isApp) {
-      docChildren.push(
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          spacing: { before: 240, after: 120 },
-          children: [new TextRun({ text: "Yours faithfully,", font: "Calibri", size: 22 })],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          spacing: { before: 480, after: 60 },
-          children: [new TextRun({ text: meta.senderName || "Applicant", bold: true, font: "Calibri", size: 22 })],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          spacing: { after: 240 },
-          children: [new TextRun({ text: meta.senderDesignation || "Student", font: "Calibri", size: 22 })],
-        })
-      );
-    }
-
-    const signingGap = isApp ? 2 : 5;
-    for (let i = 0; i < signingGap; i++) {
+    for (let i = 0; i < 5; i++) {
       docChildren.push(new Paragraph({ text: "" }));
     }
     docChildren.push(signatureTable);

@@ -281,35 +281,43 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         </section>
         ` : meta.docType === "application" ? `
         <!-- Application Letter Layout -->
-        <div style="text-align: right; margin-bottom: 15pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
-          <strong>Date:</strong> ${formatDateShort(meta.date)}
-        </div>
+        <h1 class="title" style="text-align: center; font-size: 16pt; font-weight: bold; margin-top: 15pt; margin-bottom: 25pt; font-family: 'Calibri', sans-serif; letter-spacing: 0.5px;">
+          APPLICATION
+        </h1>
         
-        <div style="margin-bottom: 20pt; font-size: 11pt; line-height: 1.5; font-family: 'Calibri', sans-serif;">
+        <div style="margin-bottom: 20pt; font-size: 11.5pt; line-height: 1.5; font-family: 'Calibri', sans-serif;">
           <strong>To,</strong><br/>
-          ${escapeHtml(meta.recipient || "The Principal,")}<br/>
-          Dhole Patil College of Engineering,<br/>
-          Pune.
+          ${meta.recipient ? escapeHtml(meta.recipient).replace(/\n/g, '<br/>') : "The Respected Principal,<br/>Dhole Patil College of Engineering, Pune."}
         </div>
         
-        <div style="margin-bottom: 20pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
-          <strong>Subject:</strong> <u>${escapeHtml(meta.title || "Application Request")}</u>
+        <div style="margin-bottom: 20pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif;">
+          <strong>Subject:</strong> ${escapeHtml(meta.title || "Request for Application")}
         </div>
         
-        <div style="margin-bottom: 12pt; font-size: 11pt; font-family: 'Calibri', sans-serif;">
-          Respected Sir/Madam,
+        <div style="margin-bottom: 14pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif;">
+          <strong>Respected Sir,</strong>
         </div>
         
         <div class="application-body" style="font-size: 12pt; line-height: 1.5; text-align: justify; margin-bottom: 30pt; font-family: 'Calibri', sans-serif;">
           ${sectionsHtml}
         </div>
         
-        <div style="margin-bottom: 50pt; font-size: 11pt; text-align: right; font-family: 'Calibri', sans-serif; float: right; width: 250px;">
-          Yours faithfully,<br/><br/><br/>
+        <div style="margin-bottom: 40pt; font-size: 11.5pt; font-family: 'Calibri', sans-serif; line-height: 1.4;">
+          Thanking You.<br/><br/>
+          Yours sincerely,<br/>
           <strong>${escapeHtml(meta.senderName || "Applicant")}</strong><br/>
-          ${escapeHtml(meta.senderDesignation || "Student")}
+          ${escapeHtml(meta.senderDesignation || "Student, Department of AI & ML")}
         </div>
-        <div style="clear: both;"></div>
+        
+        <div class="signatures" style="margin-top: 60pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed; font-family: 'Calibri', sans-serif; font-size: 11pt;">
+          <div style="display: table-cell; width: 50%; text-align: left; vertical-align: bottom;">
+            <strong>Date:</strong> ${meta.date ? formatDateShort(meta.date) : "______________"}
+          </div>
+          <div style="display: table-cell; width: 50%; text-align: right; vertical-align: bottom;">
+            <strong>Principal Sir</strong><br/>
+            ${escapeHtml(signatories.principal || "Prof. Abhijit Dandavate")}
+          </div>
+        </div>
         ` : `
         <!-- Standard Activity Report Layout -->
         <table class="header-table">
@@ -336,8 +344,8 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
         ${sectionsHtml}
         `}
 
-        ${meta.docType !== "closing_meeting" && meta.docType !== "project_proposal" ? `
-        <section class="signatures" style="margin-top: ${meta.docType === "application" ? "80pt" : "180pt"}; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
+        ${meta.docType !== "closing_meeting" && meta.docType !== "project_proposal" && meta.docType !== "application" ? `
+        <section class="signatures" style="margin-top: 180pt; page-break-inside: avoid; width: 100%; display: table; table-layout: fixed;">
           <div class="sig-col" style="display: table-cell; width: 33.33%;">
             <strong>Club Advisor</strong><br/>
             ${escapeHtml(signatories.advisor)}

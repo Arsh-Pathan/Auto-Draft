@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ReportSectionSchema = z.object({
   id: z.string(),
-  heading: z.string(),
+  heading: z.string().nullable().optional().transform((val) => val ?? ""),
   type: z.enum(["text", "bullets", "table", "image"]),
   text: z.string().optional(),
   bullets: z.array(z.string()).optional(),
