@@ -43,7 +43,7 @@ CRITICAL CONSTRAINTS FOR METADATA EXTRACTION:
 2. If the user mentions sender details (e.g. "From Arsh Pathan", "Student, Dept of AI & ML"), extract "extractedMetadata.senderName" and "extractedMetadata.senderDesignation".
 3. SIGNATORY LIST EXTRACTION:
    - If the user explicitly specifies which signatories to include or remove (e.g., "add signature of club advisor and the tg noone else", "remove principal sir", "only club advisor and teacher guardian"), output "extractedMetadata.signatoryList" containing ONLY those requested signatories as an array of objects:
-     `[ { "title": "Club Advisor", "name": "Prof. Yugashree Pawar" }, { "title": "Teacher Guardian", "name": "Department TG Coordinator" } ]`.
+     [ { "title": "Club Advisor", "name": "Prof. Yugashree Pawar" }, { "title": "Teacher Guardian", "name": "Department TG Coordinator" } ].
    - If the user asks to "remove principal sir" or "no one else", DO NOT include Principal Sir or other non-requested titles in "extractedMetadata.signatoryList"!
 
 CRITICAL CONSTRAINTS FOR SECTIONS:

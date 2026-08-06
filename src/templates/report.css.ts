@@ -10,6 +10,32 @@ export const REPORT_CSS = `
     line-height: 1.5;
   }
   
+  @keyframes docSectionAppear {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(2px);
+    }
+    60% {
+      filter: blur(0px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes writingHighlight {
+    0% {
+      background-color: rgba(59, 130, 246, 0.12);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+    }
+    100% {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+
   @media screen {
     html, body {
       background: #ffffff;
@@ -21,7 +47,13 @@ export const REPORT_CSS = `
       margin: 0 auto;
       background: #fff;
       border: 2px solid #000;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      transition: all 0.3s ease;
+    }
+    .section-animate {
+      animation: docSectionAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both, writingHighlight 1.8s ease-out both;
+      border-radius: 4px;
+      padding: 2px 4px;
     }
     .report::after {
       content: "";

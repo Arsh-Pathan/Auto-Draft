@@ -32,7 +32,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
   const assetBaseUrl = normalizeAssetBaseUrl(options.assetBaseUrl);
 
 
-  const sectionsHtml = ai.sections.map(sec => {
+  const sectionsHtml = ai.sections.map((sec, idx) => {
     let content = "";
     if (sec.type === "text") {
       content = `<p data-sec-id="${sec.id}" data-sec-field="text" contenteditable="true" style="outline:none;">${escapeHtml(sec.text || "")}</p>`;
@@ -53,7 +53,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
     }
 
     return `
-      <section class="ai-section">
+      <section class="ai-section section-animate" style="animation-delay: ${(idx * 0.1).toFixed(2)}s;">
         ${sec.heading ? `<h2 class="section" data-sec-id="${sec.id}" data-sec-field="heading" contenteditable="true" style="outline:none;">${escapeHtml(sec.heading)}</h2>` : ""}
         ${content}
       </section>
