@@ -54,7 +54,7 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
 
     return `
       <section class="ai-section">
-        ${sec.heading ? `<h2 class="section" data-sec-id="${sec.id}" data-sec-field="heading" contenteditable="true" style="outline:none;">${escapeHtml(sec.heading)}</h2>` : ""}
+        ${sec.heading && meta.docType !== "application" ? `<h2 class="section" data-sec-id="${sec.id}" data-sec-field="heading" contenteditable="true" style="outline:none;">${escapeHtml(sec.heading)}</h2>` : ""}
         ${content}
       </section>
     `;

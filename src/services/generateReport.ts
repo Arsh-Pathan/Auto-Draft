@@ -48,8 +48,9 @@ CRITICAL CONSTRAINTS FOR METADATA EXTRACTION:
 
 CRITICAL CONSTRAINTS FOR SECTIONS:
 1. Output ONLY the main body paragraphs of the letter inside the "sections" array.
-2. DO NOT include headers, titles (like "APPLICATION"), date ("Date: ..."), "To,", recipient addresses, "From,", sender addresses, "Subject:", salutations ("Respected Sir/Madam,"), closings ("Thanking You.", "Yours faithfully"), or signature lines inside the "sections" text. The visual document template ALREADY renders all of these outer letter elements automatically from the metadata!
-3. Each item in "sections" should be a clear, well-written body paragraph explaining the request, background context, justification, and respectful closing request.
+2. DO NOT include section headings! Leave the "heading" field EMPTY or omitted for all sections in application letters. Applications must consist of clean, continuous body paragraphs without bold subheadings.
+3. DO NOT include headers, titles (like "APPLICATION"), date ("Date: ..."), "To,", recipient addresses, "From,", sender addresses, "Subject:", salutations ("Respected Sir/Madam,"), closings ("Thanking You.", "Yours faithfully"), or signature lines inside the "sections" text. The visual document template ALREADY renders all of these outer letter elements automatically from the metadata!
+4. Each item in "sections" should be a clear, well-written body paragraph explaining the request, background context, justification, and respectful closing request.
 
 Return ONLY a JSON object matching the schema. No prose, no markdown, no code fences.`;
 

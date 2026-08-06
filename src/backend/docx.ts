@@ -421,7 +421,7 @@ export async function buildDocx(
   }
 
   ai.sections.forEach((sec) => {
-    if (sec.heading) {
+    if (sec.heading && meta.docType !== "application") {
       docChildren.push(
           new Paragraph({
             keepNext: true,
