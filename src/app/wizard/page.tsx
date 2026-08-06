@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Suspense, useMemo } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ImageDropzone, type LocalPhoto } from "@/frontend/ImageDropzone";
@@ -9,10 +9,12 @@ import type { DocType } from "@/types/report";
 function WizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const docType = (searchParams.get("type") || "report") as DocType;
+  const initialDocType = (searchParams.get("type") || "report") as DocType;
 
-  // State Management
-  const [step, setStep] = useState(1);
+  // Document Type State
+  const [docType, setDocType] = useState<DocType>(initialDocType);
+
+  // Form State Fields
   const [title, setTitle] = useState("");
   const [titleChoice, setTitleChoice] = useState<"manual" | "extract">("manual");
   const [date, setDate] = useState(() => {
@@ -62,138 +64,22 @@ function WizardContent() {
     }
   }, []);
 
-  // Dynamic step definitions: comprehensive and tailored per document type
-  const steps = useMemo(() => {
-    if (docType === "closing_meeting") {
-      return [
-        { id: "title", label: "What is the event title?", description: "Enter the formal title of the completed event." },
-        { id: "organizedBy", label: "Who organized this event?", description: "e.g. AI & ML Club / SDP Department" },
-        { id: "facultyCoordinator", label: "Who was the faculty coordinator?", description: "Enter the name of the faculty in charge." },
-        { id: "date", label: "What was the event date?", description: "Select the date the event took place." },
-        { id: "venue", label: "Where was it held?", description: "e.g. Seminar Hall, Computer Lab 3" },
-        { id: "timing", label: "What were the event timings & duration?", description: "e.g. Start 10:00 AM, End 4:00 PM, Duration 6 Hours" },
-        { id: "participants", label: "How many & who participated?", description: "e.g. 85 Students from TE & BE AI & ML" },
-        { id: "highlights", label: "What were key challenges or recommendations?", description: "List bullet points of challenges faced and team suggestions." },
-        { id: "photos", label: "Upload event & meeting photos", description: "Upload photographs taken during the session." },
-        { id: "rawDescription", label: "Brief summary of what happened?", description: "Mandatory: Write a summary of the meeting and event conduction." },
-        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for report generation." }
-      ];
-    } else if (docType === "project_proposal") {
-      return [
-        { id: "title", label: "What is your project title?", description: "Enter the full professional title of your proposed project." },
-        { id: "projectTrack", label: "What is the project track?", description: "e.g. Hardware Track / Software Track / AI System" },
-        { id: "senderName", label: "Who is the primary applicant & lead?", description: "Enter your full name." },
-        { id: "teamStructure", label: "What is the team structure?", description: "e.g. Arsh Pathan & Vedika Pathode (Dept of AI & ML)" },
-        { id: "techStack", label: "What target tech stack & sensors are used?", description: "e.g. Python, PyTorch, ESP32 microcontrollers, OpenCV" },
-        { id: "totalFinancialRequest", label: "What is your budgetary request?", description: "e.g. ₹ 2,500 for sensors/components, or ₹ 0 for software" },
-        { id: "hardwareSourcing", label: "What is your hardware sourcing strategy?", description: "e.g. Innovation Lab Stock / Local Vendors / Self-funded" },
-        { id: "labAccess", label: "What lab access or 3D printing is required?", description: "e.g. 3D printing enclosure slot, PCB soldering station" },
-        { id: "referenceLinks", label: "Provide reference links & diagrams", description: "Links to Architecture Blueprint, Sensor Pinouts, Video Demos & Papers." },
-        { id: "rawDescription", label: "Describe the project concept & architecture", description: "Mandatory: 2-3 sentences explaining what you are building and why." },
-        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional directions for proposal drafting." }
-      ];
-    } else if (docType === "report") {
-      return [
-        { id: "title", label: "What is the title of the event?", description: "Enter the title manually, or let Gemini extract it from your description later." },
-        { id: "date", label: "When was the event held?", description: "Select the date of the event." },
-        { id: "venue", label: "Where did it take place?", description: "e.g. Seminar Hall, A-Block, Computer Lab" },
-        { id: "participants", label: "Who attended the event?", description: "e.g. BE students, department faculty, guest speakers" },
-        { id: "highlights", label: "What were the key highlights?", description: "List some quick bullet points or takeaways." },
-        { id: "photos", label: "Upload event photos", description: "Upload event photographs with optional captions." },
-        { id: "rawDescription", label: "Roughly what happened?", description: "Mandatory: Write in simple words what happened from start to finish." },
-        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it concise, highlight the guest speaker's speech." }
-      ];
-    } else {
-      return [
-        { id: "title", label: "What is the subject of the application?", description: "Enter the subject header of your request." },
-        { id: "recipient", label: "Who is receiving this application?", description: "Enter the designation and address of the authority." },
-        { id: "date", label: "What is the date?", description: "Select the application date." },
-        { id: "senderName", label: "What is your name?", description: "Enter your full name." },
-        { id: "senderDesignation", label: "What is your designation or department?", description: "e.g. Student, Department of AI & ML" },
-        { id: "highlights", label: "What are the key points of the request?", description: "List bullet points of details or requests." },
-        { id: "rawDescription", label: "Roughly what is this request about?", description: "Mandatory: Describe why you are making this request and the details." },
-        { id: "instructions", label: "Any special instructions for Gemini?", description: "Optional: e.g. Keep it formal and polite." }
-      ];
-    }
-  }, [docType]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const totalSteps = steps.length;
-  const currentStep = steps[step - 1];
-
-  // Helper to check if current step input is empty
-  const isCurrentFieldEmpty = useMemo(() => {
-    const id = currentStep.id;
-    if (id === "rawDescription") return false;
-    
-    if (id === "title") return titleChoice === "extract" ? true : title.trim() === "";
-    if (id === "recipient") return recipient.trim() === "";
-    if (id === "date") return date.trim() === "";
-    if (id === "venue") return venue.trim() === "";
-    if (id === "participants") return participants.trim() === "";
-    if (id === "senderName") return senderName.trim() === "";
-    if (id === "senderDesignation") return senderDesignation.trim() === "";
-    if (id === "highlights") return highlights.trim() === "";
-    if (id === "instructions") return instructions.trim() === "";
-    if (id === "organizedBy") return organizedBy.trim() === "";
-    if (id === "facultyCoordinator") return facultyCoordinator.trim() === "";
-    if (id === "timing") return startTime.trim() === "";
-    if (id === "projectTrack") return projectTrack.trim() === "";
-    if (id === "teamStructure") return teamStructure.trim() === "";
-    if (id === "techStack") return techStack.trim() === "";
-    if (id === "totalFinancialRequest") return totalFinancialRequest.trim() === "";
-    if (id === "photos") return photos.length === 0;
-    return true;
-  }, [currentStep, title, titleChoice, recipient, date, venue, participants, senderName, senderDesignation, highlights, instructions, organizedBy, facultyCoordinator, startTime, projectTrack, teamStructure, techStack, totalFinancialRequest, photos]);
-
-  const handleNextClick = () => {
-    if (currentStep.id === "rawDescription" && rawDescription.trim() === "") {
-      return; // Mandated raw description cannot be empty
-    }
-
-    if (currentStep.id === "title" && title.trim() === "") {
-      // User clicked "Draft with Gemini" on the Title step.
-      // We set it to auto-extract and proceed to the next step rather than generating the whole document.
-      setTitleChoice("extract");
-      setStep(step + 1);
+    if (!rawDescription.trim()) {
+      setError("Please enter a brief description or notes to generate the document.");
       return;
     }
 
-    if (isCurrentFieldEmpty) {
-      // User clicked "Draft with Gemini" to skip/fast-track.
-      // If we are before the rawDescription step, jump directly to it to collect the mandatory raw notes.
-      const rawDescIndex = steps.findIndex((s) => s.id === "rawDescription");
-      if (step - 1 < rawDescIndex) {
-        setStep(rawDescIndex + 1);
-      } else {
-        handleSubmit();
-      }
-    } else {
-      // Proceed to next step
-      if (step < totalSteps) {
-        setStep(step + 1);
-      } else {
-        handleSubmit();
-      }
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    } else {
-      router.push("/");
-    }
-  };
-
-  const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
     const statuses = [
       "Analyzing inputs...",
-      "Consulting college templates...",
-      "Drafting official narrative...",
-      "Polishing structure...",
+      "Consulting official college templates...",
+      "Drafting formal document narrative...",
+      "Polishing structural alignment...",
       "Finalizing formatting..."
     ];
 
@@ -307,7 +193,8 @@ function WizardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 md:p-12">
+    <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
+      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
           <Image
@@ -320,20 +207,37 @@ function WizardContent() {
           <div className="w-64 bg-gray-200 h-1.5 rounded-full overflow-hidden mb-4">
             <div className="bg-blue-600 h-full rounded-full animate-progress" style={{ width: "60%" }}></div>
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Drafting Document</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-1">Drafting Document with Gemini</h3>
           <p className="text-gray-500 font-medium text-sm">{loadingStatus}</p>
         </div>
       )}
 
-      <div className="w-full max-w-xl relative flex flex-col justify-center">
-        {error && (error.includes("GEMINI_API_KEY") || error.toLowerCase().includes("quota") || error.includes("API key")) ? (
-          <div className="mb-6 p-6 rounded-xl border border-amber-200 bg-amber-50/50 space-y-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 mb-2">
+              <span className="w-2 h-2 rounded-full bg-blue-600"></span> All-in-One Generator
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Create Document</h1>
+            <p className="text-sm text-gray-500 mt-1">Fill out the details below in one place. Gemini will generate a polished, formal document.</p>
+          </div>
+          
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="text-xs font-semibold text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3.5 py-2 hover:bg-gray-50 transition-colors"
+          >
+            ← Back to Home
+          </button>
+        </div>
+
+        {/* API Key Banner if Error */}
+        {error && (error.includes("GEMINI_API_KEY") || error.toLowerCase().includes("quota") || error.includes("API key")) && (
+          <div className="p-5 rounded-2xl border border-amber-200 bg-amber-50/80 space-y-3 shadow-sm">
             <h3 className="text-sm font-bold text-amber-900 uppercase tracking-wider">Gemini API Key Required</h3>
             <p className="text-xs text-amber-700 leading-relaxed">
-              The server&apos;s Gemini API key is missing or has exceeded its limit. Please provide your own free Gemini API key to continue. You can get one from{" "}
-              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline font-bold text-amber-900 hover:opacity-80">
-                Google AI Studio
-              </a>.
+              The server&apos;s API key is missing or quota has been reached. Enter your free Gemini API key below:
             </p>
             <input
               type="password"
@@ -342,350 +246,523 @@ function WizardContent() {
                 setApiKey(e.target.value);
                 localStorage.setItem("auto_draft_api_key", e.target.value);
               }}
-              className="w-full bg-transparent border-b border-amber-300 py-2 text-sm font-medium focus:border-amber-600 focus:outline-none transition-colors placeholder-amber-400"
+              className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-sm font-medium focus:border-amber-600 focus:outline-none placeholder-amber-400"
               placeholder="Paste your API key (AIzaSy...) here"
             />
           </div>
-        ) : error ? (
-          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 font-medium">
+        )}
+
+        {error && !error.includes("API key") && !error.includes("GEMINI_API_KEY") && (
+          <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 font-medium">
             {error}
           </div>
-        ) : null}
+        )}
 
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{currentStep.label}</h2>
-            <p className="text-sm text-gray-400 mt-2 font-medium">{currentStep.description}</p>
-          </div>
+        {/* Document Type Selector Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { id: "report", label: "Activity Report", icon: "📄", desc: "Events & Workshops" },
+            { id: "application", label: "Official Application", icon: "✉️", desc: "Leave & Permissions" },
+            { id: "closing_meeting", label: "Closing Meeting", icon: "🤝", desc: "Event Post-Mortem" },
+            { id: "project_proposal", label: "Project Proposal", icon: "💡", desc: "Hardware & Tech Stack" },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setDocType(item.id as DocType)}
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                docType === item.id
+                  ? "border-blue-600 bg-blue-600 text-white shadow-md ring-2 ring-blue-600/20"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50/50"
+              }`}
+            >
+              <div className="text-2xl mb-2">{item.icon}</div>
+              <div>
+                <div className="font-bold text-sm leading-tight">{item.label}</div>
+                <div className={`text-xs mt-0.5 ${docType === item.id ? "text-blue-100" : "text-gray-400"}`}>{item.desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
 
-          {/* Form input render - simplified Typeform style */}
-          <div className="min-h-[140px] flex flex-col justify-start pt-2">
-            {currentStep.id === "title" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={titleChoice === "extract" ? "" : title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  setTitleChoice("manual");
-                }}
-                placeholder="Type title here..."
-              />
-            )}
+        {/* Main Single Form */}
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-8 shadow-sm space-y-6">
 
-            {currentStep.id === "organizedBy" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={organizedBy}
-                onChange={(e) => setOrganizedBy(e.target.value)}
-                placeholder="e.g. AI & ML Club"
-              />
-            )}
+          {/* DOCUMENT-SPECIFIC INPUT SECTIONS */}
+          {docType === "application" ? (
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <span>✉️</span> Application Header Details
+              </h2>
 
-            {currentStep.id === "facultyCoordinator" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={facultyCoordinator}
-                onChange={(e) => setFacultyCoordinator(e.target.value)}
-                placeholder="e.g. Prof. Yugashree Pawar"
-              />
-            )}
-
-            {currentStep.id === "timing" && (
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-gray-400">Start Time</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                    Application Subject / Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Permission request for granting duty attendance for AI & ML Club representation"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-gray-400">End Time</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Full Name</label>
                   <input
                     type="text"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    placeholder="e.g. Arsh Pathan"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-gray-400">Duration</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Application Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Designation / Roll No / Department</label>
                   <input
                     type="text"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
+                    value={senderDesignation}
+                    onChange={(e) => setSenderDesignation(e.target.value)}
+                    placeholder="e.g. Student, Department of AI & ML"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Addressed To (Recipient)</label>
+                  <textarea
+                    rows={3}
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    placeholder="e.g. The Principal,&#10;Dhole Patil College of Engineering, Pune."
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                   />
                 </div>
               </div>
-            )}
+            </div>
+          ) : docType === "closing_meeting" ? (
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <span>🤝</span> Closing Meeting Details
+              </h2>
 
-            {currentStep.id === "projectTrack" && (
-              <select
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none"
-                value={projectTrack}
-                onChange={(e) => setProjectTrack(e.target.value)}
-              >
-                <option value="Software Track">Software Track</option>
-                <option value="Hardware Track">Hardware Track</option>
-                <option value="AI / ML System Track">AI / ML System Track</option>
-                <option value="Embedded Systems Track">Embedded Systems Track</option>
-              </select>
-            )}
-
-            {currentStep.id === "teamStructure" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={teamStructure}
-                onChange={(e) => setTeamStructure(e.target.value)}
-                placeholder="e.g. Arsh Pathan & Vedika Pathode (Dept of AI & ML)"
-              />
-            )}
-
-            {currentStep.id === "techStack" && (
-              <textarea
-                rows={3}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
-                value={techStack}
-                onChange={(e) => setTechStack(e.target.value)}
-                placeholder="e.g. Python, PyTorch, React, ESP32 microcontrollers..."
-              />
-            )}
-
-            {currentStep.id === "totalFinancialRequest" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={totalFinancialRequest}
-                onChange={(e) => setTotalFinancialRequest(e.target.value)}
-                placeholder="e.g. ₹ 2,500 or ₹ 0"
-              />
-            )}
-
-            {currentStep.id === "hardwareSourcing" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={hardwareSourcing}
-                onChange={(e) => setHardwareSourcing(e.target.value)}
-                placeholder="e.g. Innovation Lab Stock / Local Vendors / Self-funded"
-              />
-            )}
-
-            {currentStep.id === "labAccess" && (
-              <textarea
-                rows={3}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
-                value={labAccess}
-                onChange={(e) => setLabAccess(e.target.value)}
-                placeholder="e.g. 3D printing enclosure slot, PCB soldering station..."
-              />
-            )}
-
-            {currentStep.id === "referenceLinks" && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Architecture Blueprint / Diagram Link</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                    Event Title <span className="text-red-500">*</span>
+                  </label>
                   <input
-                    type="url"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
-                    value={architectureLink}
-                    onChange={(e) => setArchitectureLink(e.target.value)}
-                    placeholder="https://raw.githubusercontent.com/.../architecture.png"
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. SDP AI & ML Workshop Closing Meeting"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Sensor Pinout / Schematic Link</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Organized By</label>
                   <input
-                    type="url"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
-                    value={sensorDiagramLink}
-                    onChange={(e) => setSensorDiagramLink(e.target.value)}
-                    placeholder="https://raw.githubusercontent.com/.../schematic.png"
+                    type="text"
+                    value={organizedBy}
+                    onChange={(e) => setOrganizedBy(e.target.value)}
+                    placeholder="e.g. AI & ML Club"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Video Demo / Implementation Link</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Faculty Coordinator</label>
                   <input
-                    type="url"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
-                    value={videoLinks}
-                    onChange={(e) => setVideoLinks(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
+                    type="text"
+                    value={facultyCoordinator}
+                    onChange={(e) => setFacultyCoordinator(e.target.value)}
+                    placeholder="e.g. Prof. Yugashree Pawar"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Academic Paper / IEEE Reference Link</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Event Date</label>
                   <input
-                    type="url"
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-sm font-medium focus:border-black focus:outline-none placeholder-gray-400"
-                    value={paperLinks}
-                    onChange={(e) => setPaperLinks(e.target.value)}
-                    placeholder="https://arxiv.org/abs/..."
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Venue</label>
+                  <input
+                    type="text"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    placeholder="Seminar Hall, A-Block"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:col-span-2">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Start Time</label>
+                    <input
+                      type="text"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">End Time</label>
+                    <input
+                      type="text"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Duration</label>
+                    <input
+                      type="text"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Participants</label>
+                  <input
+                    type="text"
+                    value={participants}
+                    onChange={(e) => setParticipants(e.target.value)}
+                    placeholder="e.g. 85 Students & 4 Faculty Members"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
               </div>
-            )}
+            </div>
+          ) : docType === "project_proposal" ? (
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <span>💡</span> Project Proposal Specifications
+              </h2>
 
-            {currentStep.id === "recipient" && (
-              <textarea
-                rows={3}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                placeholder="Address recipient here..."
-              />
-            )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                    Project Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Autonomous Campus Drone System"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "date" && (
-              <input
-                type="date"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
-            )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Project Track</label>
+                  <select
+                    value={projectTrack}
+                    onChange={(e) => setProjectTrack(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none bg-white"
+                  >
+                    <option value="Software Track">Software Track</option>
+                    <option value="Hardware Track">Hardware Track</option>
+                    <option value="AI / ML System Track">AI / ML System Track</option>
+                    <option value="Embedded Systems Track">Embedded Systems Track</option>
+                  </select>
+                </div>
 
-            {currentStep.id === "venue" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-                placeholder="e.g. Seminar Hall, A-Block"
-              />
-            )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Proposal Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "participants" && (
-              <textarea
-                rows={2}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
-                value={participants}
-                onChange={(e) => setParticipants(e.target.value)}
-                placeholder="e.g. TE & BE students..."
-              />
-            )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Lead Applicant Name</label>
+                  <input
+                    type="text"
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    placeholder="e.g. Arsh Pathan"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "senderName" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                placeholder="Your name..."
-              />
-            )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Team Structure</label>
+                  <input
+                    type="text"
+                    value={teamStructure}
+                    onChange={(e) => setTeamStructure(e.target.value)}
+                    placeholder="e.g. Arsh Pathan & Vedika Pathode (Dept of AI & ML)"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "senderDesignation" && (
-              <input
-                type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
-                value={senderDesignation}
-                onChange={(e) => setSenderDesignation(e.target.value)}
-                placeholder="e.g. Student, AI & ML Club"
-              />
-            )}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Target Tech Stack & Microcontrollers</label>
+                  <input
+                    type="text"
+                    value={techStack}
+                    onChange={(e) => setTechStack(e.target.value)}
+                    placeholder="Python, PyTorch, ESP32 microcontrollers, OpenCV"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "highlights" && (
-              <textarea
-                rows={3}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
-                value={highlights}
-                onChange={(e) => setHighlights(e.target.value)}
-                placeholder="Type key bullet points..."
-              />
-            )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Total Financial Request (₹)</label>
+                  <input
+                    type="text"
+                    value={totalFinancialRequest}
+                    onChange={(e) => setTotalFinancialRequest(e.target.value)}
+                    placeholder="₹ 2,500 or ₹ 0"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
 
-            {currentStep.id === "rawDescription" && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Hardware Sourcing</label>
+                  <input
+                    type="text"
+                    value={hardwareSourcing}
+                    onChange={(e) => setHardwareSourcing(e.target.value)}
+                    placeholder="Innovation Lab Stock / Local Vendors"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Lab Access Requirements</label>
+                  <input
+                    type="text"
+                    value={labAccess}
+                    onChange={(e) => setLabAccess(e.target.value)}
+                    placeholder="3D Printing Workshop & Circuit Testing"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 pt-2 border-t border-gray-100 space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Technical Reference Links (Optional)</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      type="url"
+                      value={architectureLink}
+                      onChange={(e) => setArchitectureLink(e.target.value)}
+                      placeholder="Architecture Diagram URL (https://...)"
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-xs font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                    <input
+                      type="url"
+                      value={sensorDiagramLink}
+                      onChange={(e) => setSensorDiagramLink(e.target.value)}
+                      placeholder="Sensor Pinout URL (https://...)"
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-xs font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                    <input
+                      type="url"
+                      value={videoLinks}
+                      onChange={(e) => setVideoLinks(e.target.value)}
+                      placeholder="Video Demo URL (https://...)"
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-xs font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                    <input
+                      type="url"
+                      value={paperLinks}
+                      onChange={(e) => setPaperLinks(e.target.value)}
+                      placeholder="Academic Paper URL (https://...)"
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-xs font-medium focus:border-blue-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <span>📄</span> Activity Report Details
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                      Report Title
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (titleChoice === "extract") {
+                          setTitleChoice("manual");
+                          setTitle("");
+                        } else {
+                          setTitleChoice("extract");
+                          setTitle("");
+                        }
+                      }}
+                      className={`text-xs font-bold px-2.5 py-0.5 rounded-full border transition-colors ${
+                        titleChoice === "extract"
+                          ? "bg-blue-100 text-blue-700 border-blue-300"
+                          : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                      }`}
+                    >
+                      {titleChoice === "extract" ? "✓ Gemini Auto-Generate Title" : "Auto-Generate with Gemini"}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    disabled={titleChoice === "extract"}
+                    value={titleChoice === "extract" ? "" : title}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setTitleChoice("manual");
+                    }}
+                    placeholder={titleChoice === "extract" ? "Gemini will automatically generate a fitting title..." : "e.g. Hands-On PyTorch Workshop"}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Event Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Venue</label>
+                  <input
+                    type="text"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    placeholder="Seminar Hall, A-Block"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Participants</label>
+                  <input
+                    type="text"
+                    value={participants}
+                    onChange={(e) => setParticipants(e.target.value)}
+                    placeholder="e.g. TE & BE students, faculty members..."
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* COMMON NARRATIVE & ROUGH NOTES SECTION */}
+          <div className="space-y-4 pt-4 border-t border-gray-100">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span>✍️</span> Description & Rough Notes
+            </h2>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                Rough Notes / Narrative <span className="text-red-500">*</span>
+              </label>
               <textarea
                 rows={4}
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-2 text-lg font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300 resize-none"
+                required
                 value={rawDescription}
                 onChange={(e) => setRawDescription(e.target.value)}
-                placeholder="Type what roughly happened here..."
+                placeholder="Write freely in simple words what this document is about, what happened, or what you are requesting. Gemini will structure this into formal academic text."
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
               />
-            )}
+            </div>
 
-            {currentStep.id === "instructions" && (
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Highlights / Specific Points (Optional)</label>
+              <textarea
+                rows={2}
+                value={highlights}
+                onChange={(e) => setHighlights(e.target.value)}
+                placeholder="Bullet points of specific highlights, challenges, or key takeaways..."
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Special AI Instructions (Optional)</label>
               <input
                 type="text"
-                autoFocus
-                className="w-full bg-transparent border-b border-gray-300 py-3 text-2xl font-medium focus:border-black focus:outline-none transition-colors placeholder-gray-300"
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
-                placeholder="Specific directions..."
+                placeholder="e.g. Keep it concise, formal, and emphasize duty attendance period."
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
               />
-            )}
-
-            {currentStep.id === "photos" && (
-              <div className="w-full scale-95 origin-top">
-                <ImageDropzone
-                  photos={photos}
-                  onAdd={(added) => setPhotos([...photos, ...added])}
-                  onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
-                  onCaption={(id, caption) =>
-                    setPhotos(photos.map((p) => (p.id === id ? { ...p, caption } : p)))
-                  }
-                />
-              </div>
-            )}
+            </div>
           </div>
-        </div>
 
-        {/* Bottom Actions */}
-        <div className="mt-12 pt-6 border-t border-gray-150 flex justify-between items-center">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-black transition-colors uppercase tracking-wider"
-          >
-            Back
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleNextClick}
-            disabled={currentStep.id === "rawDescription" && rawDescription.trim() === ""}
-            className={`px-8 py-2.5 text-sm font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] ${
-              currentStep.id === "rawDescription" && rawDescription.trim() === ""
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-900"
-            }`}
-          >
-            {currentStep.id === "rawDescription"
-              ? step === totalSteps
-                ? "Finish & Draft"
-                : "Next"
-              : isCurrentFieldEmpty
-              ? "Draft with Gemini"
-              : step === totalSteps
-              ? "Finish & Draft"
-              : "Next"}
-          </button>
-        </div>
+          {/* PHOTOGRAPHS (FOR REPORTS & CLOSING MEETINGS) */}
+          {docType !== "application" && (
+            <div className="space-y-3 pt-4 border-t border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span>📷</span> Event Photographs (Optional)
+              </h2>
+              <ImageDropzone
+                photos={photos}
+                onAdd={(added) => setPhotos([...photos, ...added])}
+                onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
+                onCaption={(id, caption) =>
+                  setPhotos(photos.map((p) => (p.id === id ? { ...p, caption } : p)))
+                }
+              />
+            </div>
+          )}
+
+          {/* SUBMIT BUTTON */}
+          <div className="pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="px-5 py-3 rounded-xl border border-gray-300 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-8 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-md hover:bg-blue-700 transition-all hover:scale-[1.01] flex items-center gap-2"
+            >
+              <span>✨ Generate & Draft with Gemini</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -693,7 +770,7 @@ function WizardContent() {
 
 export default function WizardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500 font-semibold">Loading questions...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500 font-semibold">Loading...</div>}>
       <WizardContent />
     </Suspense>
   );
