@@ -357,6 +357,7 @@ function EditorContent() {
           <AIChatAssistant
             form={form}
             setForm={setForm}
+            ai={ai}
             setAi={setAi}
             apiKey={apiKey}
           />

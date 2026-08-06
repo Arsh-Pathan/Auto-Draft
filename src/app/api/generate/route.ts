@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-import { DocType } from "@/types/report";
+import { DocType, ReportSection } from "@/types/report";
 
 type Meta = {
   title?: string;
@@ -34,6 +34,7 @@ type Meta = {
   advisor?: string;
   sdpHead?: string;
   principal?: string;
+  existingSections?: ReportSection[];
 };
 
 export async function POST(req: Request) {
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
         advisor: meta.advisor ? String(meta.advisor) : undefined,
         sdpHead: meta.sdpHead ? String(meta.sdpHead) : undefined,
         principal: meta.principal ? String(meta.principal) : undefined,
+        existingSections: meta.existingSections,
       },
       meta.apiKey ? String(meta.apiKey) : undefined
     );

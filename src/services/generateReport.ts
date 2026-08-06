@@ -165,6 +165,7 @@ export type GenerateInput = {
   advisor?: string;
   sdpHead?: string;
   principal?: string;
+  existingSections?: ReportSection[];
 };
 
 export function applyExtractedMetadata(form: FormState, data: ReportData): FormState {
@@ -193,7 +194,22 @@ export function applyExtractedMetadata(form: FormState, data: ReportData): FormS
   return updated;
 }
 
+function formatExistingSections(sections?: ReportSection[]): string {
+  if (!sections || sections.length === 0) return "";
+  return sections
+    .map((sec, i) => {
+      let val = "";
+      if (sec.type === "text") val = sec.text || "";
+      else if (sec.type === "bullets") val = (sec.bullets || []).map((b) => `- ${b}`).join("\n");
+      else if (sec.type === "table") val = JSON.stringify(sec.table || []);
+      return `Section ${i + 1} [id: ${sec.id}, type: ${sec.type}, heading: "${sec.heading || ""}"]:\n${val}`;
+    })
+    .join("\n\n");
+}
+
 function buildUserMessage(input: GenerateInput): string {
+  const existingFormatted = formatExistingSections(input.existingSections);
+
   if (input.docType === "application") {
     const base = [
       `DOCUMENT TYPE: Academic Letter / Application`,
@@ -206,8 +222,11 @@ function buildUserMessage(input: GenerateInput): string {
       `RAW DESCRIPTION / DETAILS: ${input.rawDescription || "(not provided)"}`,
       `KEY HIGHLIGHTS / NOTES: ${input.highlights || "(not provided)"}`,
     ];
+    if (existingFormatted) {
+      base.push(`\nCURRENT EXISTING DOCUMENT BODY SECTIONS:\n${existingFormatted}`);
+    }
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
+      base.push(`\nUSER REVISION / CHAT REQUEST:\n${input.instructions}\n(Mandate: Apply this request to edit, refine, or rewrite the document sections and metadata above.)`);
     }
     return base.join("\n");
   }
@@ -227,8 +246,11 @@ function buildUserMessage(input: GenerateInput): string {
       `RAW NOTES / WHAT HAPPENED: ${input.rawDescription || "(not provided)"}`,
       `KEY HIGHLIGHTS / CHALLENGES: ${input.highlights || "(not provided)"}`,
     ];
+    if (existingFormatted) {
+      base.push(`\nCURRENT EXISTING DOCUMENT SECTIONS:\n${existingFormatted}`);
+    }
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
+      base.push(`\nUSER REVISION / CHAT REQUEST:\n${input.instructions}\n(Mandate: Apply this request to edit, refine, or rewrite the document sections and metadata above.)`);
     }
     return base.join("\n");
   }
@@ -244,8 +266,11 @@ function buildUserMessage(input: GenerateInput): string {
       `RAW DESCRIPTION / CONCEPT: ${input.rawDescription || "(not provided)"}`,
       `KEY HIGHLIGHTS / REQUIREMENTS: ${input.highlights || "(not provided)"}`,
     ];
+    if (existingFormatted) {
+      base.push(`\nCURRENT EXISTING DOCUMENT SECTIONS:\n${existingFormatted}`);
+    }
     if (input.instructions) {
-      base.push(`\nSPECIAL USER INSTRUCTIONS / CHAT REQUEST:\n${input.instructions}`);
+      base.push(`\nUSER REVISION / CHAT REQUEST:\n${input.instructions}\n(Mandate: Apply this request to edit, refine, or rewrite the document sections and metadata above.)`);
     }
     return base.join("\n");
   }

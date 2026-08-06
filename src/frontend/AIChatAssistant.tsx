@@ -13,6 +13,7 @@ type ChatMessage = {
 type Props = {
   form: FormState;
   setForm: (f: FormState) => void;
+  ai?: ReportData;
   setAi: (a: ReportData) => void;
   apiKey: string;
 };
@@ -53,7 +54,7 @@ function TypingText({ text, isNew }: { text: string; isNew?: boolean }) {
   );
 }
 
-export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
+export function AIChatAssistant({ form, setForm, ai, setAi, apiKey }: Props) {
   const [isOpen, setIsOpen] = useState(true);
   const [inputPrompt, setInputPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -106,6 +107,7 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
         body: JSON.stringify({
           ...form,
           instructions: updatedInstructions,
+          existingSections: ai?.sections,
           apiKey,
         }),
       });
