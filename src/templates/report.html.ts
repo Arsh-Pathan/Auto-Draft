@@ -401,48 +401,61 @@ export function renderReportHtml(payload: ReportPayload, options: RenderOptions 
       _t = setTimeout(() => window.parent.postMessage({ type: 'PREVIEW_EDIT', id, field, value }, '*'), 500);
     });
 
-    // AI Diffusion Scramble-Decode Animation
+    // AI Rapid Matrix/Diffusion Scramble-Decode Animation
     document.addEventListener('DOMContentLoaded', () => {
-      const glyphs = '░▒▓█<>/\\_+-*!?#@$%&~≈±≡§01';
+      const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?░▒▓█';
       const targets = document.querySelectorAll('.typewriter-target');
-      
+
       targets.forEach((el, index) => {
         const fullText = el.innerText;
         if (!fullText || fullText.trim().length === 0) return;
-        
+
         el.classList.add('diffusing-active');
-        
+
+        // Assign random lock-in frame thresholds for every character position
+        const totalFrames = 32;
+        const lockFrames = [];
+        for (let i = 0; i < fullText.length; i++) {
+          if (fullText[i] === ' ' || fullText[i] === '\n' || fullText[i] === '\t') {
+            lockFrames.push(0);
+          } else {
+            const progress = i / fullText.length;
+            const minLock = Math.floor(progress * 16);
+            const maxLock = Math.min(totalFrames, minLock + 16);
+            lockFrames.push(Math.floor(minLock + Math.random() * (maxLock - minLock)));
+          }
+        }
+
         setTimeout(() => {
-          let iteration = 0;
-          const totalSteps = Math.min(35, Math.max(12, fullText.length));
-          const stepInterval = Math.max(15, Math.floor(800 / totalSteps));
-          
+          let currentFrame = 0;
           const timer = setInterval(() => {
-            let currentStr = '';
-            const revealedLength = Math.floor((iteration / totalSteps) * fullText.length);
-            
+            let outputStr = '';
+            let allDone = true;
+
             for (let i = 0; i < fullText.length; i++) {
-              const char = fullText[i];
-              if (char === ' ' || char === '\n' || char === '\t') {
-                currentStr += char;
-              } else if (i < revealedLength) {
-                currentStr += char;
+              const targetChar = fullText[i];
+              if (targetChar === ' ' || targetChar === '\n' || targetChar === '\t') {
+                outputStr += targetChar;
+              } else if (currentFrame >= lockFrames[i]) {
+                outputStr += targetChar;
               } else {
-                currentStr += glyphs[Math.floor(Math.random() * glyphs.length)];
+                allDone = false;
+                // Rapidly cycle random glyphs on every single frame
+                outputStr += glyphs[Math.floor(Math.random() * glyphs.length)];
               }
             }
-            
-            el.innerText = currentStr;
-            iteration++;
-            
-            if (iteration > totalSteps) {
+
+            el.innerText = outputStr;
+            currentFrame++;
+
+            if (currentFrame > totalFrames || allDone) {
               clearInterval(timer);
               el.innerText = fullText;
               el.classList.remove('diffusing-active');
               el.classList.add('diffused-complete');
             }
-          }, stepInterval);
-        }, index * 120);
+          }, 30);
+        }, index * 100);
       });
     });
   </script>
