@@ -31,6 +31,9 @@ type Meta = {
   teamStructure?: string;
   techStack?: string;
   totalFinancialRequest?: string;
+  advisor?: string;
+  sdpHead?: string;
+  principal?: string;
 };
 
 export async function POST(req: Request) {
@@ -80,6 +83,9 @@ export async function POST(req: Request) {
         teamStructure: meta.teamStructure ? String(meta.teamStructure) : undefined,
         techStack: meta.techStack ? String(meta.techStack) : undefined,
         totalFinancialRequest: meta.totalFinancialRequest ? String(meta.totalFinancialRequest) : undefined,
+        advisor: meta.advisor ? String(meta.advisor) : undefined,
+        sdpHead: meta.sdpHead ? String(meta.sdpHead) : undefined,
+        principal: meta.principal ? String(meta.principal) : undefined,
       },
       meta.apiKey ? String(meta.apiKey) : undefined
     );

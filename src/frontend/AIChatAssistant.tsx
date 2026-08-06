@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { FormState, ReportData } from "@/types/report";
 
 type ChatMessage = {
@@ -7,6 +7,7 @@ type ChatMessage = {
   sender: "user" | "ai";
   text: string;
   timestamp: string;
+  isNew?: boolean;
 };
 
 type Props = {
@@ -16,8 +17,44 @@ type Props = {
   apiKey: string;
 };
 
+function TypingText({ text, isNew }: { text: string; isNew?: boolean }) {
+  const [displayedText, setDisplayedText] = useState(isNew ? "" : text);
+  const [isTyping, setIsTyping] = useState(isNew ?? false);
+
+  useEffect(() => {
+    if (!isNew) {
+      setDisplayedText(text);
+      setIsTyping(false);
+      return;
+    }
+
+    setIsTyping(true);
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText(text.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+        setIsTyping(false);
+      }
+    }, 15);
+
+    return () => clearInterval(timer);
+  }, [text, isNew]);
+
+  return (
+    <span>
+      {displayedText}
+      {isTyping && (
+        <span className="inline-block w-1.5 h-3.5 bg-blue-600 ml-1 animate-pulse rounded-sm align-middle" />
+      )}
+    </span>
+  );
+}
+
 export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [inputPrompt, setInputPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -26,8 +63,19 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
       sender: "ai",
       text: "Hi! I am your AI Assistant. Ask me to rewrite sections, add bullet points, refine the tone, or update document details!",
       timestamp: "Just now",
+      isNew: false,
     },
   ]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +86,7 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
       sender: "user",
       text: inputPrompt.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isNew: false,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -61,7 +110,18 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
         }),
       });
 
-      const json = await res.json();
+      const resText = await res.text();
+      let json;
+      try {
+        json = JSON.parse(resText);
+      } catch {
+        throw new Error(
+          res.status === 500
+            ? "Server error during generation. Please verify your Gemini API key or try again."
+            : `Generation returned unexpected format: ${resText.slice(0, 80)}`
+        );
+      }
+
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Failed to update document");
       }
@@ -89,6 +149,7 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
         if (meta.projectTrack) newForm.projectTrack = meta.projectTrack;
         if (meta.teamStructure) newForm.teamStructure = meta.teamStructure;
         if (meta.techStack) newForm.techStack = meta.techStack;
+        if (meta.signatoryList) newForm.signatoryList = meta.signatoryList;
       }
       setForm(newForm);
 
@@ -104,6 +165,7 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
         sender: "ai",
         text: `Done! I've updated your document sections based on: "${currentPrompt}". You can see the updated preview on the right!`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isNew: true,
       };
       setMessages((prev) => [...prev, aiReply]);
     } catch (err) {
@@ -114,6 +176,7 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
           err instanceof Error ? err.message : "Unknown error"
         }`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isNew: true,
       };
       setMessages((prev) => [...prev, errorReply]);
     } finally {
@@ -134,14 +197,14 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
           </svg>
           <span>Chat with AI Assistant (Live Edits)</span>
         </div>
-        <span className="text-xs font-normal bg-blue-500 px-2 py-0.5 rounded-full">
-          {isOpen ? "Collapse" : "Open Chat"}
+        <span className="text-xs font-normal bg-blue-500 px-2.5 py-1 rounded-full">
+          {isOpen ? "Hide Chat" : "Open Chat"}
         </span>
       </button>
 
       {isOpen && (
         <div className="p-4 space-y-4">
-          <div className="max-h-60 overflow-y-auto space-y-3 pr-1 text-xs">
+          <div className="max-h-64 overflow-y-auto space-y-3 pr-1 text-xs scrollbar-thin">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -150,23 +213,32 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
                 }`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 leading-relaxed ${
+                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 leading-relaxed shadow-xs ${
                     msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-none font-medium"
-                      : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
+                      : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
                   }`}
                 >
-                  {msg.text}
+                  {msg.sender === "ai" ? (
+                    <TypingText text={msg.text} isNew={msg.isNew} />
+                  ) : (
+                    msg.text
+                  )}
                 </div>
                 <span className="text-[10px] text-gray-400 mt-1 px-1">{msg.timestamp}</span>
               </div>
             ))}
             {loading && (
-              <div className="flex items-center gap-2 text-xs text-blue-600 font-semibold animate-pulse">
-                <span className="h-2 w-2 rounded-full bg-blue-600" />
-                AI is editing your document sections...
+              <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-2xl px-3 py-2 w-fit">
+                <span className="font-medium text-[11px] text-blue-700">AI is editing your document</span>
+                <div className="flex gap-1 items-center ml-1">
+                  <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
+                </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={handleSend} className="flex gap-2 pt-2 border-t border-gray-100">
@@ -174,13 +246,13 @@ export function AIChatAssistant({ form, setForm, setAi, apiKey }: Props) {
               type="text"
               value={inputPrompt}
               onChange={(e) => setInputPrompt(e.target.value)}
-              placeholder="e.g. Make the text more formal, add 3 bullet points..."
-              className="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-xs focus:border-blue-600 focus:outline-none placeholder-gray-400"
+              placeholder="e.g. Make the text formal, add 3 bullet points..."
+              className="flex-1 rounded-xl border border-gray-300 px-3.5 py-2 text-xs focus:border-blue-600 focus:outline-none placeholder-gray-400"
             />
             <button
               type="submit"
               disabled={loading || !inputPrompt.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm shrink-0"
             >
               Send
             </button>
