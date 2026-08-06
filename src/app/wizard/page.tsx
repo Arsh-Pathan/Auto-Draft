@@ -6,10 +6,33 @@ import { ImageDropzone, type LocalPhoto } from "@/frontend/ImageDropzone";
 import { REPORT_DEFAULTS, SIGNATORIES } from "@/utils/constants";
 import type { DocType } from "@/types/report";
 
+const DOC_CONFIGS: Record<DocType, { title: string; subtitle: string; desc: string }> = {
+  application: {
+    title: "Draft Official Application",
+    subtitle: "Formal request letters for leave, permissions, duty attendance, or facility bookings.",
+    desc: "Application Format",
+  },
+  report: {
+    title: "Draft Activity Report",
+    subtitle: "Standard DPCOE event report with automated notes, highlights, and photo attachments.",
+    desc: "Activity Report Format",
+  },
+  closing_meeting: {
+    title: "Draft Closing Meeting Report",
+    subtitle: "Post-event summary detailing timing, key challenges, recommendations, and signatories.",
+    desc: "Closing Meeting Format",
+  },
+  project_proposal: {
+    title: "Draft Project Proposal",
+    subtitle: "30-day project approval request detailing track, tech stack, lab access, and financial budget.",
+    desc: "Project Proposal Format",
+  },
+};
+
 function WizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialDocType = (searchParams.get("type") || "report") as DocType;
+  const initialDocType = (searchParams.get("type") || "application") as DocType;
 
   // Document Type State
   const [docType, setDocType] = useState<DocType>(initialDocType);
@@ -192,6 +215,8 @@ function WizardContent() {
     }
   };
 
+  const currentConfig = DOC_CONFIGS[docType] || DOC_CONFIGS.application;
+
   return (
     <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
       {/* Loading Overlay */}
@@ -212,24 +237,51 @@ function WizardContent() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 mb-2">
-              <span className="w-2 h-2 rounded-full bg-blue-600"></span> All-in-One Generator
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Create Document</h1>
-            <p className="text-sm text-gray-500 mt-1">Fill out the details below in one place. Gemini will generate a polished, formal document.</p>
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Header tailored to Selected Document Type */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-8 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 mb-2">
+                {currentConfig.desc}
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                {currentConfig.title}
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">{currentConfig.subtitle}</p>
+            </div>
+            
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="text-xs font-semibold text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3.5 py-2 hover:bg-gray-50 transition-colors shrink-0"
+            >
+              ← Back to Home
+            </button>
           </div>
-          
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="text-xs font-semibold text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3.5 py-2 hover:bg-gray-50 transition-colors"
-          >
-            ← Back to Home
-          </button>
+
+          {/* Document Format Switch Tabs */}
+          <div className="pt-2 border-t border-gray-100 flex flex-wrap gap-2">
+            {[
+              { id: "application", label: "Official Application" },
+              { id: "report", label: "Activity Report" },
+              { id: "closing_meeting", label: "Closing Meeting" },
+              { id: "project_proposal", label: "Project Proposal" },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setDocType(item.id as DocType)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  docType === item.id
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* API Key Banner if Error */}
@@ -258,40 +310,14 @@ function WizardContent() {
           </div>
         )}
 
-        {/* Document Type Selector Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { id: "report", label: "Activity Report", desc: "Events & Workshops" },
-            { id: "application", label: "Official Application", desc: "Leave & Permissions" },
-            { id: "closing_meeting", label: "Closing Meeting", desc: "Event Post-Mortem" },
-            { id: "project_proposal", label: "Project Proposal", desc: "Hardware & Tech Stack" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setDocType(item.id as DocType)}
-              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                docType === item.id
-                  ? "border-blue-600 bg-blue-600 text-white shadow-md ring-2 ring-blue-600/20"
-                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50/50"
-              }`}
-            >
-              <div>
-                <div className="font-bold text-sm leading-tight">{item.label}</div>
-                <div className={`text-xs mt-1 ${docType === item.id ? "text-blue-100" : "text-gray-400"}`}>{item.desc}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Main Single Form */}
+        {/* SINGLE FOCUSED FORM FOR THE SELECTED DOCUMENT TYPE ONLY */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-8 shadow-sm space-y-6">
 
-          {/* DOCUMENT-SPECIFIC INPUT SECTIONS */}
-          {docType === "application" ? (
+          {/* APPLICATION FORM FIELDS */}
+          {docType === "application" && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
-                Application Header Details
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
+                Application Details
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -304,40 +330,40 @@ function WizardContent() {
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Permission request for granting duty attendance for AI & ML Club representation"
+                    placeholder="e.g. Application for Granting Duty Attendance for AI & ML Club Representation"
                     className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Full Name</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Name</label>
                   <input
                     type="text"
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
                     placeholder="e.g. Arsh Pathan"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Application Date</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Date</label>
                   <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Designation / Roll No / Department</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Sender Designation / Department</label>
                   <input
                     type="text"
                     value={senderDesignation}
                     onChange={(e) => setSenderDesignation(e.target.value)}
-                    placeholder="e.g. Student, Department of AI & ML"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    placeholder="e.g. Student, Department of AI & ML, DPCOE"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
 
@@ -348,14 +374,17 @@ function WizardContent() {
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                     placeholder="e.g. The Principal,&#10;Dhole Patil College of Engineering, Pune."
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium focus:border-blue-600 focus:outline-none"
                   />
                 </div>
               </div>
             </div>
-          ) : docType === "closing_meeting" ? (
+          )}
+
+          {/* CLOSING MEETING FORM FIELDS */}
+          {docType === "closing_meeting" && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
                 Closing Meeting Details
               </h2>
 
@@ -459,9 +488,12 @@ function WizardContent() {
                 </div>
               </div>
             </div>
-          ) : docType === "project_proposal" ? (
+          )}
+
+          {/* PROJECT PROPOSAL FORM FIELDS */}
+          {docType === "project_proposal" && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
                 Project Proposal Specifications
               </h2>
 
@@ -605,9 +637,12 @@ function WizardContent() {
                 </div>
               </div>
             </div>
-          ) : (
+          )}
+
+          {/* ACTIVITY REPORT FORM FIELDS */}
+          {docType === "report" && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
                 Activity Report Details
               </h2>
 
@@ -687,7 +722,7 @@ function WizardContent() {
 
           {/* COMMON NARRATIVE & ROUGH NOTES SECTION */}
           <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-900">
               Description & Rough Notes
             </h2>
 
@@ -731,7 +766,7 @@ function WizardContent() {
           {/* PHOTOGRAPHS (FOR REPORTS & CLOSING MEETINGS) */}
           {docType !== "application" && (
             <div className="space-y-3 pt-4 border-t border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900">
                 Event Photographs (Optional)
               </h2>
               <ImageDropzone
