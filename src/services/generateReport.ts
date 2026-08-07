@@ -1,5 +1,5 @@
 import "server-only";
-import { ReportDataSchema, type ReportData, type DocType, type FormState } from "@/types/report";
+import { ReportDataSchema, type ReportData, type DocType, type FormState, type ReportSection } from "@/types/report";
 import { callGemini, type ChatMessage, type ChatImage } from "@/backend/gemini";
 
 const SYSTEM_PROMPT = `You are a formal academic report writer for the AI & ML Club at Dhole Patil College of Engineering. Convert the user's notes and chat requests into a structured event report and extracted metadata.

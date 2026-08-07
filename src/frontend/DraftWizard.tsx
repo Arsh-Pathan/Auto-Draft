@@ -40,7 +40,7 @@ export function DraftWizard({ isOpen, onClose, onComplete, photos, setPhotos, in
   const [venue, setVenue] = useState("");
   const [participants, setParticipants] = useState("");
   const recipient = "The Principal,\nDhole Patil College of Engineering,\nPune.";
-  const senderName = "";
+  const [senderName, setSenderName] = useState("");
   const senderDesignation = "Student, Department of AI & ML";
   const [rawDescription, setRawDescription] = useState("");
   const [highlights, setHighlights] = useState("");
